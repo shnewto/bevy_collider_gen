@@ -4,7 +4,7 @@ a library for generating bevy_rapier2d colliders, for bevy apps, from images wit
 
 ## example
 
-![](/img/example-default.png)
+![](https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/example-default.png?raw=true)
 
 to see this in action you can run the example, with no args it generates a scene with various colliders using pngs in the `assets/sprite` directory
 ```sh
@@ -37,29 +37,28 @@ from any pixel in an existing group, that pixel begins a new group.
 - i imagine for generating things at a larger scale, i.e. colliders for sets of sprites bigger than pixel counts in the hundreds, this implementation won't be performant to do at runtime. i'll suggest serializing the colliders you like and deserializing in your app instead of doing all the number crunching on load when you need a performance boost
 
 
-## Examples of Colliders generated for assets/sprite/car.png 
+## examples of colliders generated for assets/sprite/car.png 
 
 (as in pictures of the sort of thing you can expect, not the runnable bevy app example. that's a couple headings up)
 
-
 ### convex polyline
 
-![](/img/convex-polyline.png)
+![](https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-polyline.png?raw=true)
 
 ### polyline
 
-![](/img/polyline.png)
+![](https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/polyline.png?raw=true)
 
 ### convex hull
 
-![](/img/convex-hull.png)
+![](https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-hull.png?raw=true)
 
 ### heightfield
 
 the current implementation does best if the image you're generating a heightfield from is either centered in the image
 or spans the entire width of the image...
 
-![](/img/heightfield.png)
+![](https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/heightfield.png?raw=true)
 
 ### convex decomposition
 
@@ -83,4 +82,11 @@ for coords in edge_coordinate_groups {
 }
 ```
 
-![](/img/convex-decomposition.png)
+![](https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-decomposition.png?raw=true)
+
+## license
+all code in this repository is dual-licensed under either:
+- MIT License (LICENSE-MIT or http://opensource.org/licenses/MIT)
+- Apache License, Version 2.0 (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0)
+
+at your option. 
