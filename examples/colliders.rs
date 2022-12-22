@@ -304,8 +304,6 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
 
     if game_assets.image_handles.get("car_handle").is_some() {
         let car_controls: String = indoc! {"
-            if running default example
-            --------------------
             a d (move car)
             1 (reset car transform to initial)
         "}
