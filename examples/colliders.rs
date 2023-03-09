@@ -2,7 +2,8 @@ use bevy::asset::LoadState;
 use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
 use bevy::render::settings::{WgpuFeatures, WgpuSettings};
-use bevy_prototype_lyon::prelude::{DrawMode, FillMode, GeometryBuilder, ShapePlugin};
+use bevy::render::RenderPlugin;
+use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
 use bevy_rapier2d::prelude::*;
 use bevy_rapier_collider_gen::*;
@@ -140,13 +141,17 @@ pub fn boulders_spawn(
             points: coords.clone(),
             closed: true,
         };
-        let geometry = GeometryBuilder::build_as(
-            &shape,
-            DrawMode::Fill(FillMode::color(Color::hex("545454").unwrap())),
-            Transform::from_xyz(0., 40., 0.),
-        );
+        let geometry = GeometryBuilder::build_as(&shape);
+        let fill = Fill::color(Color::hex("545454").unwrap());
+        let transform = Transform::from_xyz(0., 40., 0.);
 
-        commands.spawn((geometry, collider.unwrap(), RigidBody::Dynamic));
+        commands.spawn((
+            geometry,
+            fill,
+            transform,
+            collider.unwrap(),
+            RigidBody::Dynamic,
+        ));
     }
 }
 
@@ -154,8 +159,9 @@ pub fn boulders_spawn(
 /// After this, things don't differ in a way related to this crate, it's just some of my
 /// personal boilerplate
 ///
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(States, Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub enum AppState {
+    #[default]
     Loading,
     Running,
 }
@@ -168,25 +174,27 @@ pub struct GameAsset {
 
 fn main() {
     App::new()
-        .add_state(AppState::Loading)
+        .add_state::<AppState>()
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
-                    window: WindowDescriptor {
+                    primary_window: Some(Window {
                         title: "colliders".to_string(),
                         ..default()
-                    },
+                    }),
                     ..default()
                 })
                 .set(AssetPlugin {
                     asset_folder: ".".to_string(),
                     watch_for_changes: true,
+                })
+                .set(RenderPlugin {
+                    wgpu_settings: WgpuSettings {
+                        features: WgpuFeatures::POLYGON_MODE_LINE,
+                        ..default()
+                    },
                 }),
         )
-        .insert_resource(WgpuSettings {
-            features: WgpuFeatures::POLYGON_MODE_LINE,
-            ..default()
-        })
         .insert_resource(GameAsset::default())
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugin(ShapePlugin)
@@ -200,23 +208,25 @@ fn main() {
             },
             ..default()
         })
-        .add_system_set(SystemSet::on_enter(AppState::Loading).with_system(load_assets))
-        .add_system_set(SystemSet::on_update(AppState::Loading).with_system(check_assets))
-        .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(camera_spawn))
-        .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(custom_png_spawn))
-        .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(car_spawn))
-        .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(terrain_spawn))
-        .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(boulders_spawn))
-        .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(controls_text_spawn))
-        .add_system_set(SystemSet::on_update(AppState::Running).with_system(camera_movement))
-        .add_system_set(SystemSet::on_update(AppState::Running).with_system(car_movement))
+        .add_systems((
+            load_assets.in_schedule(OnEnter(AppState::Loading)),
+            check_assets.run_if(in_state(AppState::Loading)),
+            camera_spawn.in_schedule(OnExit(AppState::Loading)),
+            custom_png_spawn.in_schedule(OnExit(AppState::Loading)),
+            car_spawn.in_schedule(OnExit(AppState::Loading)),
+            terrain_spawn.in_schedule(OnExit(AppState::Loading)),
+            boulders_spawn.in_schedule(OnExit(AppState::Loading)),
+            controls_text_spawn.in_schedule(OnExit(AppState::Loading)),
+            camera_movement.run_if(in_state(AppState::Running)),
+            car_movement.run_if(in_state(AppState::Running)),
+        ))
         .run();
 }
 
 pub fn check_assets(
     asset_server: Res<AssetServer>,
     game_assets: Res<GameAsset>,
-    mut state: ResMut<State<AppState>>,
+    mut state: ResMut<NextState<AppState>>,
 ) {
     for h in game_assets.image_handles.values() {
         if LoadState::Loaded != asset_server.get_load_state(h) {
@@ -228,7 +238,7 @@ pub fn check_assets(
         return;
     }
 
-    state.set(AppState::Running).unwrap()
+    state.set(AppState::Running)
 }
 
 pub fn camera_spawn(mut commands: Commands) {
@@ -337,10 +347,8 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
             }],
-            alignment: TextAlignment {
-                vertical: VerticalAlign::Center,
-                horizontal: HorizontalAlign::Left,
-            },
+            alignment: TextAlignment::Left,
+            ..default()
         },
         ..Default::default()
     };
