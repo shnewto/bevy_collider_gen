@@ -1,6 +1,6 @@
 [package]
 name = "bevy_rapier_collider_gen"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 homepage = "https://github.com/shnewto/bevy_rapier_collider_gen_dev"
 license = "MIT OR Apache-2.0"
