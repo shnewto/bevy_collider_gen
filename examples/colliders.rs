@@ -1,4 +1,4 @@
-use bevy::asset::LoadState;
+use bevy::asset::{LoadState, ChangeWatcher};
 use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
 use bevy::render::settings::{WgpuFeatures, WgpuSettings};
@@ -9,6 +9,7 @@ use bevy_rapier2d::prelude::*;
 use bevy_rapier_collider_gen::*;
 use indoc::indoc;
 use std::collections::HashMap;
+use std::time::Duration;
 
 /// Colliders (or, with no png path specified, Car + Boulder + Terrain)
 /// Illustrating how to use PNG files w transparency to generate colliders (and geometry)
@@ -186,7 +187,7 @@ fn main() {
                 })
                 .set(AssetPlugin {
                     asset_folder: ".".to_string(),
-                    watch_for_changes: true,
+                    watch_for_changes: ChangeWatcher::with_delay(Duration::from_millis(200)),
                 })
                 .set(RenderPlugin {
                     wgpu_settings: WgpuSettings {
@@ -197,10 +198,10 @@ fn main() {
         )
         .insert_resource(GameAsset::default())
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .add_plugin(ShapePlugin)
-        .add_plugin(WireframePlugin)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
-        .add_plugin(RapierDebugRenderPlugin {
+        .add_plugins(ShapePlugin)
+        .add_plugins(WireframePlugin)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
+        .add_plugins(RapierDebugRenderPlugin {
             style: DebugRenderStyle {
                 collider_fixed_color: [360., 100., 100., 1.],
                 collider_dynamic_color: [360., 100., 100., 1.],
@@ -208,15 +209,17 @@ fn main() {
             },
             ..default()
         })
-        .add_systems((
-            load_assets.in_schedule(OnEnter(AppState::Loading)),
+        .add_systems(OnEnter(AppState::Loading), load_assets)
+        .add_systems(OnExit(AppState::Loading), (
+            camera_spawn,
+            custom_png_spawn,
+            car_spawn,
+            terrain_spawn,
+            boulders_spawn,
+            controls_text_spawn,
+        ))
+        .add_systems(Update, (
             check_assets.run_if(in_state(AppState::Loading)),
-            camera_spawn.in_schedule(OnExit(AppState::Loading)),
-            custom_png_spawn.in_schedule(OnExit(AppState::Loading)),
-            car_spawn.in_schedule(OnExit(AppState::Loading)),
-            terrain_spawn.in_schedule(OnExit(AppState::Loading)),
-            boulders_spawn.in_schedule(OnExit(AppState::Loading)),
-            controls_text_spawn.in_schedule(OnExit(AppState::Loading)),
             camera_movement.run_if(in_state(AppState::Running)),
             car_movement.run_if(in_state(AppState::Running)),
         ))
@@ -324,15 +327,13 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
 
     let node_bundle = NodeBundle {
         style: Style {
-            size: Size::new(Val::Px(100.0), Val::Px(10.0)),
+            width: Val::Px(100.),
+            height: Val::Px(10.),
             position_type: PositionType::Absolute,
             justify_content: JustifyContent::FlexStart,
             align_items: AlignItems::FlexStart,
-            position: UiRect {
-                left: Val::Px(80.0),
-                bottom: Val::Px(600.0),
-                ..default()
-            },
+            left: Val::Px(80.0),
+            bottom: Val::Px(600.0),
             ..default()
         },
         ..Default::default()

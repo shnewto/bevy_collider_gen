@@ -1,21 +1,21 @@
 [package]
 name = "bevy_rapier_collider_gen"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
-homepage = "https://github.com/shnewto/bevy_rapier_collider_gen_dev"
+homepage = "https://github.com/shnewto/bevy_rapier_collider_gen"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/shnewto/bevy_rapier_collider_gen_dev"
+repository = "https://github.com/shnewto/bevy_rapier_collider_gen"
 
 description = "a library for generating bevy_rapier2d colliders, for bevy apps, from images with transparency"
 keywords = ["bevy", "rapier", "png", "collider", "2d"]
 readme = "README.md"
 
 [dependencies]
-bevy = "0.10.0"
-bevy_rapier2d = "0.21.0"
+bevy = "0.11.0"
+bevy_rapier2d = "0.22.0"
 
 [dev-dependencies]
-bevy_prototype_lyon = "0.8.0"
+bevy_prototype_lyon = "0.9.0"
 indoc = "1.0.9"
 
 [[example]]
