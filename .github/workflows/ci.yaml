@@ -109,6 +109,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: rustup component add clippy
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: cargo clippy
+        run: cargo clippy --all-features --all-targets 
