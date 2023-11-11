@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v2
+
+      - name: install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: install rustfmt
+        run: rustup component add rustfmt
+
+      - name: rustfmt check
+        run: cargo fmt --all -- --check
+
+  macos-latest-stable:
+    needs: [format]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+  macos-latest-nightly:
+    needs: [format]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+  windows-latest-stable:
+    needs: [format]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+  windows-latest-nightly:
+    needs: [format]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+  ubuntu-latest-nightly:
+    needs: [format]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - name: install bevy linux deps
+        run: sudo apt-get install g++ pkg-config libx11-dev libasound2-dev libudev-dev
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+  clippy:
+    needs: [format]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: rustup component add clippy
+      - name: cargo clippy
+        run: cargo clippy --all-features --all-targets 
