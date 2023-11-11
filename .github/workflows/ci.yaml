@@ -96,6 +96,8 @@ jobs:
         with:
           toolchain: nightly
           override: true
+      - name: Install alsa-sys-dev
+        run: sudo apt-get install -y librust-alsa-sys-dev
       - name: cargo build
         uses: actions-rs/cargo@v1
         with:
@@ -105,17 +107,13 @@ jobs:
     needs: [format]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
-          override: true
-          components: clippy
-          profile: minimal
-      # because this action requires an access token
-      # pin to specific version to prevent future malicious activity
-      - uses: actions-rs/clippy-check@v1.0.7
+            toolchain: nightly
+            components: clippy
+            override: true
+      - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features --all-targets
