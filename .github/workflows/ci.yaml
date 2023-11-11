@@ -96,8 +96,10 @@ jobs:
         with:
           toolchain: nightly
           override: true
-      - name: Install alsa-sys-dev
+      - name: install alsa-sys-dev
         run: sudo apt-get install -y librust-alsa-sys-dev
+      - name: intall libudev
+        run: sudo apt-get install -y libudev
       - name: cargo build
         uses: actions-rs/cargo@v1
         with:
@@ -108,13 +110,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-            toolchain: nightly
-            components: clippy
-            override: true
+      - run: rustup component add clippy
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features --all-targets
-
