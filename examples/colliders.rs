@@ -1,7 +1,7 @@
-use bevy::asset::{LoadState, ChangeWatcher};
+use bevy::asset::LoadState;
 use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
-use bevy::render::settings::{WgpuFeatures, WgpuSettings};
+use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::RenderPlugin;
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
@@ -9,7 +9,6 @@ use bevy_rapier2d::prelude::*;
 use bevy_rapier_collider_gen::*;
 use indoc::indoc;
 use std::collections::HashMap;
-use std::time::Duration;
 
 /// Colliders (or, with no png path specified, Car + Boulder + Terrain)
 /// Illustrating how to use PNG files w transparency to generate colliders (and geometry)
@@ -186,14 +185,14 @@ fn main() {
                     ..default()
                 })
                 .set(AssetPlugin {
-                    asset_folder: ".".to_string(),
-                    watch_for_changes: ChangeWatcher::with_delay(Duration::from_millis(200)),
+                    file_path: ".".to_string(),
+                    ..default()
                 })
                 .set(RenderPlugin {
-                    wgpu_settings: WgpuSettings {
+                    render_creation: RenderCreation::Automatic(WgpuSettings {
                         features: WgpuFeatures::POLYGON_MODE_LINE,
                         ..default()
-                    },
+                    }),
                 }),
         )
         .insert_resource(GameAsset::default())
@@ -210,19 +209,25 @@ fn main() {
             ..default()
         })
         .add_systems(OnEnter(AppState::Loading), load_assets)
-        .add_systems(OnExit(AppState::Loading), (
-            camera_spawn,
-            custom_png_spawn,
-            car_spawn,
-            terrain_spawn,
-            boulders_spawn,
-            controls_text_spawn,
-        ))
-        .add_systems(Update, (
-            check_assets.run_if(in_state(AppState::Loading)),
-            camera_movement.run_if(in_state(AppState::Running)),
-            car_movement.run_if(in_state(AppState::Running)),
-        ))
+        .add_systems(
+            OnExit(AppState::Loading),
+            (
+                camera_spawn,
+                custom_png_spawn,
+                car_spawn,
+                terrain_spawn,
+                boulders_spawn,
+                controls_text_spawn,
+            ),
+        )
+        .add_systems(
+            Update,
+            (
+                check_assets.run_if(in_state(AppState::Loading)),
+                camera_movement.run_if(in_state(AppState::Running)),
+                car_movement.run_if(in_state(AppState::Running)),
+            ),
+        )
         .run();
 }
 
@@ -232,12 +237,12 @@ pub fn check_assets(
     mut state: ResMut<NextState<AppState>>,
 ) {
     for h in game_assets.image_handles.values() {
-        if LoadState::Loaded != asset_server.get_load_state(h) {
+        if Some(LoadState::Loaded) != asset_server.get_load_state(h) {
             return;
         }
     }
 
-    if LoadState::Loaded != asset_server.get_load_state(game_assets.font_handle.clone()) {
+    if Some(LoadState::Loaded) != asset_server.get_load_state(game_assets.font_handle.clone()) {
         return;
     }
 
