@@ -47,22 +47,22 @@ from any pixel in an existing group, that pixel begins a new group.
 
 ### convex polyline
 
-![](<<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-polyline.png?raw=true>)
+![convex polyline collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-polyline.png?raw=true>)
 
 ### polyline
 
-![](<<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/polyline.png?raw=true>)
+![polyline collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/polyline.png?raw=true>)
 
 ### convex hull
 
-![](<<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-hull.png?raw=true>)
+![convex hull collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-hull.png?raw=true>)
 
 ### heightfield
 
 the current implementation does best if the image you're generating a heightfield from is either centered in the image
 or spans the entire width of the image...
 
-![](<<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/heightfield.png?raw=true>)
+![heightfield collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/heightfield.png?raw=true>)
 
 ### convex decomposition
 
@@ -86,13 +86,13 @@ for coords in edge_coordinate_groups {
 }
 ```
 
-![](<<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-decomposition.png?raw=true>)
+![convex decomposition collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-decomposition.png?raw=true>)
 
 ## license
 
 all code in this repository is dual-licensed under either:
 
-- MIT License (LICENSE-MIT or <<http://opensource.org/licenses/MIT>)
-- Apache License, Version 2.0 (LICENSE-APACHE or <<http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT License (LICENSE-MIT or <http://opensource.org/licenses/MIT>)
+- Apache License, Version 2.0 (LICENSE-APACHE or <http://www.apache.org/licenses/LICENSE-2.0>)
 
 at your option.
