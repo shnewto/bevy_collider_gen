@@ -174,7 +174,7 @@ pub struct GameAsset {
 
 fn main() {
     App::new()
-        .add_state::<AppState>()
+        .init_state::<AppState>()
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
@@ -193,6 +193,7 @@ fn main() {
                         features: WgpuFeatures::POLYGON_MODE_LINE,
                         ..default()
                     }),
+                    ..default()
                 }),
         )
         .insert_resource(GameAsset::default())
@@ -255,29 +256,29 @@ pub fn camera_spawn(mut commands: Commands) {
 
 pub fn camera_movement(
     mut query: Query<(&Camera, &mut OrthographicProjection, &mut Transform)>,
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
 ) {
     for (_, mut projection, mut transform) in query.iter_mut() {
-        if keys.pressed(KeyCode::Left) {
+        if keys.pressed(KeyCode::ArrowLeft) {
             transform.translation.x += 10.0;
         }
-        if keys.pressed(KeyCode::Right) {
+        if keys.pressed(KeyCode::ArrowRight) {
             transform.translation.x -= 10.0;
         }
 
-        if keys.pressed(KeyCode::Up) {
+        if keys.pressed(KeyCode::ArrowUp) {
             transform.translation.y -= 10.0;
         }
 
-        if keys.pressed(KeyCode::Down) {
+        if keys.pressed(KeyCode::ArrowDown) {
             transform.translation.y += 10.0;
         }
 
-        if keys.pressed(KeyCode::W) {
+        if keys.pressed(KeyCode::KeyW) {
             projection.scale -= 0.01;
         }
 
-        if keys.pressed(KeyCode::S) {
+        if keys.pressed(KeyCode::KeyS) {
             projection.scale += 0.01;
         }
     }
@@ -353,7 +354,7 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
                     color: Color::rgb(0.9, 0.9, 0.9),
                 },
             }],
-            alignment: TextAlignment::Left,
+            justify: JustifyText::Left,
             ..default()
         },
         ..Default::default()
@@ -364,17 +365,17 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
     });
 }
 
-pub fn car_movement(mut query: Query<(&Car, &mut Transform)>, keys: Res<Input<KeyCode>>) {
+pub fn car_movement(mut query: Query<(&Car, &mut Transform)>, keys: Res<ButtonInput<KeyCode>>) {
     for (car, mut transform) in query.iter_mut() {
-        if keys.pressed(KeyCode::D) {
+        if keys.pressed(KeyCode::KeyD) {
             transform.translation.x += 5.0;
         }
 
-        if keys.pressed(KeyCode::A) {
+        if keys.pressed(KeyCode::KeyA) {
             transform.translation.x -= 5.0;
         }
 
-        if keys.pressed(KeyCode::Key1) {
+        if keys.pressed(KeyCode::Digit1) {
             *transform =
                 Transform::from_xyz(car.initial_xyz.x, car.initial_xyz.y, car.initial_xyz.z);
         }
