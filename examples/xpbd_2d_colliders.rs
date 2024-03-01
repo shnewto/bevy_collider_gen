@@ -8,9 +8,15 @@ use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::RenderPlugin;
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
-use bevy_rapier_collider_gen::xpbd_2d::{multi_convex_hull_collider_translated, single_convex_hull_collider_translated, single_heightfield_collider_raw, single_heightfield_collider_translated, single_polyline_collider_translated};
+use bevy_rapier_collider_gen::xpbd_2d::{
+    multi_convex_hull_collider_translated, single_convex_hull_collider_translated,
+    single_heightfield_collider_raw, single_heightfield_collider_translated,
+    single_polyline_collider_translated,
+};
 use bevy_rapier_collider_gen::*;
-use bevy_xpbd_2d::components::{CoefficientCombine, ColliderDensity, Friction, GravityScale, Restitution, RigidBody};
+use bevy_xpbd_2d::components::{
+    CoefficientCombine, ColliderDensity, Friction, GravityScale, Restitution, RigidBody,
+};
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::debug::DebugRender;
 use bevy_xpbd_2d::plugins::{PhysicsDebugPlugin, PhysicsPlugins};
@@ -87,7 +93,7 @@ pub fn car_spawn(
         Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
         Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
         ColliderDensity(2.0),
-        GravityScale(1.5),        
+        GravityScale(1.5),
         DebugRender::default().with_collider_color(Color::VIOLET),
     ));
 }

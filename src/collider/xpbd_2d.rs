@@ -77,7 +77,6 @@ pub fn multi_polyline_collider_raw(image: &Image) -> Vec<Collider> {
         .collect()
 }
 
-
 // Is there an xpbd equivalent for this?
 //
 // Generate as many convex_polyline colliders as it can find in the image,
@@ -123,7 +122,7 @@ pub fn multi_heightfield_collider_raw(image: &Image) -> Vec<Collider> {
 pub fn multi_convex_hull_collider_translated(image: &Image) -> Vec<Option<Collider>> {
     multi_image_edge_translated(image)
         .into_iter()
-        .map(|e| Collider::convex_hull(e))
+        .map(Collider::convex_hull)
         .collect()
 }
 
@@ -132,7 +131,7 @@ pub fn multi_convex_hull_collider_translated(image: &Image) -> Vec<Option<Collid
 pub fn multi_convex_hull_collider_raw(image: &Image) -> Vec<Option<Collider>> {
     multi_image_edges_raw(image)
         .into_iter()
-        .map(|e| Collider::convex_hull(e))
+        .map(Collider::convex_hull)
         .collect()
 }
 
@@ -140,7 +139,7 @@ pub fn multi_convex_hull_collider_raw(image: &Image) -> Vec<Option<Collider>> {
 /// heightfield collider
 fn heightfield_collider_from_points(v: &[Vec2]) -> Collider {
     let hf = heights_from_points(v);
-    // convert v into a vector 
+    // convert v into a vector
     let x_scale = hf.len() as f32 - 1.0;
     Collider::heightfield(hf, x_scale)
 }

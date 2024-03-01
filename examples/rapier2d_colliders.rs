@@ -9,7 +9,10 @@ use bevy::render::RenderPlugin;
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
 use bevy_rapier2d::prelude::*;
-use bevy_rapier_collider_gen::rapier2d::{multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated, single_heightfield_collider_translated};
+use bevy_rapier_collider_gen::rapier2d::{
+    multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
+    single_heightfield_collider_translated,
+};
 use bevy_rapier_collider_gen::*;
 use indoc::indoc;
 use std::collections::HashMap;
