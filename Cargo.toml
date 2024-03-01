@@ -11,14 +11,24 @@ description = "a library for generating bevy_rapier2d colliders, for bevy apps, 
 keywords = ["bevy", "rapier", "png", "collider", "2d"]
 readme = "README.md"
 
+[features]
+default = ["xpbd_2d", "rapier2d"]
+xpbd_2d = ["dep:bevy_xpbd_2d"]
+rapier2d = ["dep:bevy_rapier2d"]
+
 [dependencies]
 bevy = "0.13.0"
-bevy_rapier2d = "0.25.0"
+bevy_rapier2d = { version = "0.25.0", optional = true }
+bevy_xpbd_2d = { version = "0.4.2", optional = true }
 
 [dev-dependencies]
 bevy_prototype_lyon = "0.11.0"
 indoc = "2.0.4"
 
 [[example]]
-name = "colliders"
-path = "examples/colliders.rs"
+name = "xpbd_2d_colliders"
+path = "examples/xpbd_2d_colliders.rs"
+
+[[example]]
+name = "rapier2d_colliders"
+path = "examples/rapier2d_colliders.rs"
