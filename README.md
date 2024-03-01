@@ -4,7 +4,7 @@
 [![Crates.io](<https://img.shields.io/crates/d/bevy_rapier_collider_gen.svg>)](<https://crates.io/crates/bevy_rapier_collider_gen>)
 [![MIT/Apache 2.0](<https://img.shields.io/badge/license-MIT%2FApache-blue.svg>)](<https://github.com/shnewto/bevy_rapier_collider_gen#license>)
 
-a library for generating bevy_rapier2d colliders, for bevy apps, from images with transparency
+a library for generating bevy_rapier2d and bevy_xpbd_2d colliders, for bevy apps, from images with transparency
 
 ## example
 
@@ -12,11 +12,19 @@ a library for generating bevy_rapier2d colliders, for bevy apps, from images wit
 
 to see this in action you can run the example, with no args it generates a scene with various colliders using pngs in the `assets/sprite` directory
 
+### bevy_rapier2d
+
 ```sh
-cargo run --example colliders
+cargo run --example rapier2d_colliders
 ```
 
-you can also specify a path to an image yourself the example will attempt to generate one or more bevy_rapier_2d convex polylines for the objects it finds
+### bevy_xpbd_2d
+
+```sh
+cargo run --example xpbd_2d_colliders
+```
+
+you can also specify a path to an image yourself the example will attempt to generate one or more for the objects it finds
 
 ## about / why
 
@@ -45,7 +53,7 @@ from any pixel in an existing group, that pixel begins a new group.
 
 (as in pictures of the sort of thing you can expect, not the runnable bevy app example. that's a couple headings up)
 
-### convex polyline
+### convex polyline (bevy_raiper2d only)
 
 ![convex polyline collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-polyline.png?raw=true>)
 

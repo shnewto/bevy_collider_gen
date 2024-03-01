@@ -9,9 +9,8 @@ use bevy::render::RenderPlugin;
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
 use bevy_rapier_collider_gen::xpbd_2d::{
-    multi_convex_hull_collider_translated, single_convex_hull_collider_translated,
-    single_heightfield_collider_raw, single_heightfield_collider_translated,
-    single_polyline_collider_translated,
+    multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
+    single_heightfield_collider_translated,
 };
 use bevy_rapier_collider_gen::*;
 use bevy_xpbd_2d::components::{
@@ -46,7 +45,7 @@ pub fn custom_png_spawn(
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 
-    let colliders = multi_convex_hull_collider_translated(sprite_image);
+    let colliders = multi_convex_polyline_collider_translated(sprite_image);
     for collider in colliders {
         commands.spawn((
             collider.unwrap(),
@@ -67,7 +66,7 @@ pub struct Car {
     pub initial_xyz: Vec3,
 }
 
-/// Car: convex_hull collider
+/// Car: convex_polyline collider
 /// from assets/sprite/car.png
 pub fn car_spawn(
     mut commands: Commands,
@@ -80,7 +79,7 @@ pub fn car_spawn(
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_convex_hull_collider_translated(sprite_image).unwrap();
+    let collider = single_convex_polyline_collider_translated(sprite_image).unwrap();
     commands.spawn((
         collider,
         SpriteBundle {
@@ -110,7 +109,7 @@ pub fn terrain_spawn(
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_heightfield_collider_raw(sprite_image);
+    let collider = single_heightfield_collider_translated(sprite_image);
     commands.spawn((
         collider,
         RigidBody::Static,
@@ -137,7 +136,7 @@ pub fn boulders_spawn(
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 
     let coord_group = multi_image_edge_translated(sprite_image);
-    let colliders = multi_convex_hull_collider_translated(sprite_image);
+    let colliders = multi_convex_polyline_collider_translated(sprite_image);
 
     for (coords, collider) in coord_group.iter().zip(colliders.into_iter()) {
         let shape = shapes::Polygon {
