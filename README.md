@@ -4,7 +4,7 @@
 [![Crates.io](<https://img.shields.io/crates/d/bevy_rapier_collider_gen.svg>)](<https://crates.io/crates/bevy_rapier_collider_gen>)
 [![MIT/Apache 2.0](<https://img.shields.io/badge/license-MIT%2FApache-blue.svg>)](<https://github.com/shnewto/bevy_rapier_collider_gen#license>)
 
-a library for generating bevy_rapier2d and bevy_xpbd_2d colliders, for bevy apps, from images with transparency
+a library for generating 2d colliders, for bevy apps, from images with transparency
 
 ## example
 
@@ -14,17 +14,21 @@ to see this in action you can run the example, with no args it generates a scene
 
 ### bevy_rapier2d
 
+#### note that you must have the rapier2d feature enabled
+
 ```sh
 cargo run --example rapier2d_colliders
 ```
 
 ### bevy_xpbd_2d
 
+#### note that you must have the xpbd_2d feature enabled
+
 ```sh
 cargo run --example xpbd_2d_colliders
 ```
 
-you can also specify a path to an image yourself the example will attempt to generate one or more for the objects it finds
+you can also specify a path to an image yourself the example will attempt to generate one or more convex_polyline colliders for the objects it finds
 
 ## about / why
 

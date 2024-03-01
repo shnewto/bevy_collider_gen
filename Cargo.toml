@@ -12,7 +12,7 @@ keywords = ["bevy", "rapier", "png", "collider", "2d"]
 readme = "README.md"
 
 [features]
-default = ["xpbd_2d"]
+default = ["xpbd_2d","rapier2d"]
 xpbd_2d = ["dep:bevy_xpbd_2d"]
 rapier2d = ["dep:bevy_rapier2d"]
 

@@ -1,8 +1,5 @@
 #![doc = include_str!("../README.md")]
 
-#[cfg(all(not(feature = "rapier2d"), not(feature = "xpbd_2d")))]
-compile_error!("At least one of the features `rapier2d` or `xpbd_2d` must be enabled.");
-
 mod collider;
 mod edge;
 
