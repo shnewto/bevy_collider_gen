@@ -12,7 +12,7 @@ keywords = ["bevy", "rapier", "png", "collider", "2d"]
 readme = "README.md"
 
 [features]
-default = ["xpbd_2d", "rapier2d"]
+default = ["xpbd_2d"]
 xpbd_2d = ["dep:bevy_xpbd_2d"]
 rapier2d = ["dep:bevy_rapier2d"]
 
@@ -28,7 +28,9 @@ indoc = "2.0.4"
 [[example]]
 name = "xpbd_2d_colliders"
 path = "examples/xpbd_2d_colliders.rs"
+required-features = ["xpbd_2d"]
 
 [[example]]
 name = "rapier2d_colliders"
 path = "examples/rapier2d_colliders.rs"
+required-features = ["rapier2d"]

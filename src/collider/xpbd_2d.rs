@@ -4,8 +4,10 @@ use crate::{
 };
 use bevy::prelude::{Image, Vec2};
 use bevy_xpbd_2d::{
+    math::Vector2,
     parry::{
-        math::{Point, Real},
+        math::{Point, Real, Vector},
+        na::DVector,
         shape::SharedShape,
     },
     prelude::Collider,
@@ -150,10 +152,10 @@ pub fn multi_convex_hull_collider_raw(image: &Image) -> Vec<Option<Collider>> {
 /// parses x,y points into y values at the top of the image (smallest y) and creates a
 /// heightfield collider
 fn heightfield_collider_from_points(v: &[Vec2]) -> Collider {
-    let hf = heights_from_points(v);
-    // convert v into a vector
-    let x_scale = hf.len() as f32 - 1.0;
-    Collider::heightfield(hf, x_scale)
+    let hf: DVector<Real> = heights_from_points(v).into();
+    let x_scale: Real = hf.len() as f32 - 1.0;
+    let scale: Vector<Real> = Vector2::new(x_scale, 1.0).into();
+    Collider::from(SharedShape::heightfield(hf, scale))
 }
 
 /// takes x,y points collects the y values at the top of the image (smallest y)

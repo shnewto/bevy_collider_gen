@@ -1,6 +1,3 @@
-#[cfg(not(feature = "rapier2d"))]
-compile_error!("rapier2d` feature must be enabled.");
-
 use bevy::asset::LoadState;
 use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;

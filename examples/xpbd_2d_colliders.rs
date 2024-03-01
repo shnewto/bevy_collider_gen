@@ -1,6 +1,3 @@
-#[cfg(not(feature = "xpbd_2d"))]
-compile_error!("xpbd_2d` feature must be enabled.");
-
 use bevy::asset::LoadState;
 use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
