@@ -1,13 +1,13 @@
 [package]
-name = "bevy_rapier_collider_gen"
+name = "bevy_collider_gen"
 # don't manually edit this version unless you're sure you want to circumvent the process documented in RELEASE.md
-version = "0.3.1"
+version = "0.1.0"
 edition = "2021"
-homepage = "https://github.com/shnewto/bevy_rapier_collider_gen"
+homepage = "https://github.com/shnewto/bevy_collider_gen"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/shnewto/bevy_rapier_collider_gen"
+repository = "https://github.com/shnewto/bevy_collider_gen"
 
-description = "a library for generating bevy_rapier2d colliders, for bevy apps, from images with transparency"
+description = "a library for generating colliders, for bevy apps, from images with transparency"
 keywords = ["bevy", "rapier", "png", "collider", "2d"]
 readme = "README.md"
 

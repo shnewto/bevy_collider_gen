@@ -1,14 +1,36 @@
-# bevy_rapier_collider_gen
+# bevy_collider_gen
 
-[![Crates.io](<https://img.shields.io/crates/v/bevy_rapier_collider_gen.svg>)](<https://crates.io/crates/bevy_rapier_collider_gen>)
-[![Crates.io](<https://img.shields.io/crates/d/bevy_rapier_collider_gen.svg>)](<https://crates.io/crates/bevy_rapier_collider_gen>)
-[![MIT/Apache 2.0](<https://img.shields.io/badge/license-MIT%2FApache-blue.svg>)](<https://github.com/shnewto/bevy_rapier_collider_gen#license>)
+[![Crates.io](<https://img.shields.io/crates/v/bevy_collider_gen.svg>)](<https://crates.io/crates/bevy_collider_gen>)
+[![Crates.io](<https://img.shields.io/crates/d/bevy_collider_gen.svg>)](<https://crates.io/crates/bevy_collider_gen>)
+[![MIT/Apache 2.0](<https://img.shields.io/badge/license-MIT%2FApache-blue.svg>)](<https://github.com/shnewto/bevy_collider_gen#license>)
 
 a library for generating 2d colliders, for bevy apps, from images with transparency
 
+## specifying your dependency
+
+by default, both bevy_rapier2d and bevy_xpbd_2d are enabled. this is to help with the out of box experience, specifically, being able to run both examples and tinker.
+
+but you'll probably only want to just use one of the physics engines supported so when you use it in your own crate fill in in the `bevy_collider_gen` dependencies with something like this for `bevy_rapier2d`
+
+```toml
+[dependencies.bevy_collider_gen]
+version = "*"
+features = ["rapier2d"]
+default-features = false
+```
+
+or this for `bevy_xpbd_2d`
+
+```toml
+[dependencies.bevy_collider_gen]
+version = "*"
+features = ["xpbd_2d"]
+default-features = false
+```
+
 ## example
 
-![example with a car, terrain, and boulders](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/example-default.png?raw=true>)
+![example with a car, terrain, and boulders](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/example-default.png?raw=true>)
 
 to see this in action you can run the example, with no args it generates a scene with various colliders using pngs in the `assets/sprite` directory
 
@@ -59,22 +81,22 @@ from any pixel in an existing group, that pixel begins a new group.
 
 ### convex polyline (bevy_raiper2d only)
 
-![convex polyline collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-polyline.png?raw=true>)
+![convex polyline collider on an upside down car sprite](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/convex-polyline.png?raw=true>)
 
 ### polyline
 
-![polyline collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/polyline.png?raw=true>)
+![polyline collider on an upside down car sprite](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/polyline.png?raw=true>)
 
 ### convex hull
 
-![convex hull collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-hull.png?raw=true>)
+![convex hull collider on an upside down car sprite](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/convex-hull.png?raw=true>)
 
 ### heightfield
 
 the current implementation does best if the image you're generating a heightfield from is either centered in the image
 or spans the entire width of the image...
 
-![heightfield collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/heightfield.png?raw=true>)
+![heightfield collider on an upside down car sprite](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/heightfield.png?raw=true>)
 
 ### convex decomposition
 
@@ -98,7 +120,7 @@ for coords in edge_coordinate_groups {
 }
 ```
 
-![convex decomposition collider on an upside down car sprite](<https://github.com/shnewto/bevy_rapier_collider_gen/blob/main/img/convex-decomposition.png?raw=true>)
+![convex decomposition collider on an upside down car sprite](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/convex-decomposition.png?raw=true>)
 
 ## license
 
