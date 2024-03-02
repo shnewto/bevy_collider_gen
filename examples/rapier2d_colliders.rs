@@ -3,10 +3,14 @@ use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
 use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::RenderPlugin;
+use bevy_collider_gen::multi_image_edge_translated;
+use bevy_collider_gen::rapier2d::{
+    multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
+    single_heightfield_collider_translated,
+};
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
 use bevy_rapier2d::prelude::*;
-use bevy_rapier_collider_gen::*;
 use indoc::indoc;
 use std::collections::HashMap;
 
