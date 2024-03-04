@@ -14,6 +14,7 @@ but you'll probably only want to just use one of the physics engines supported s
 
 ```toml
 [dependencies.bevy_collider_gen]
+# replace "*" with the most recent version of bevy_collider_gen
 version = "*"
 features = ["rapier2d"]
 default-features = false
@@ -23,6 +24,7 @@ or this for `bevy_xpbd_2d`
 
 ```toml
 [dependencies.bevy_collider_gen]
+# replace "*" with the most recent version of bevy_collider_gen
 version = "*"
 features = ["xpbd_2d"]
 default-features = false
@@ -60,19 +62,11 @@ packaged up my approach here in case anyone else could benefit.
 
 ## how it works
 
-i was inspired by [a coding train (or, coding in the cabana rather) on an implementation of "marching squares"](<https://youtu.be/0ZONMNUKTfU>).
-so this crate takes a "march through all the values" approach to find edges, i.e. pixels with at least 1 empty neighboring pixel, but
-instead of drawing a contour in place, it just keeps track of all the actual pixel coordinates. to determine "empty" I bitwise
-or all the bytes for each pixel and, in images with transparency, "empty" is a zero value for the pixel.
-
-after that, we need to put the coordinates in some kind of "drawing order" so whatever we pass all the points to, knows how we want the object constructed. for this, the
-crate collects all pixels, in order, that are a distance of 1 from eachother. if there are pixels that have a distance greater than 1
-from any pixel in an existing group, that pixel begins a new group.
+😄 head on over to the edges crate to learn more <https://github.com/shnewto/edges>
 
 ## caveats
 
 - as mentioned here and there in these docs, this implementation requires images to have transparency in order to distinguish object from non-object :)
-- there's no reason we couldn't generate colliders / geometry without transparency, it's just not implemented. if you've got a compelling case, raise an issue! or even better, create a pr!
 - i imagine for generating things at a larger scale, i.e. colliders for sets of sprites bigger than pixel counts in the hundreds, this implementation won't be performant to do at runtime. i'll suggest serializing the colliders you like and deserializing in your app instead of doing all the number crunching on load when you need a performance boost
 
 ## examples of colliders generated for assets/sprite/car.png
@@ -105,7 +99,8 @@ convex decomposition colliders you could construct them with the edge coordinate
 
 ```rust
 let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-let edge_coordinate_groups = multi_image_edge_translated(sprite_image);
+let edges = Edges::from(sprite_image)
+let edge_coordinate_groups = edges.multi_image_edge_translated();
 for coords in edge_coordinate_groups {
     let indices: Vec<[u32; 2]> = (0..coords.len()).map(|i| [i as u32, i as u32]).collect();
     let collider = Collider::convex_decomposition(&coords, &indices);
@@ -120,7 +115,7 @@ for coords in edge_coordinate_groups {
 }
 ```
 
-![convex decomposition collider on an upside down car sprite](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/convex-decomposition.png?raw=true>)
+![convex decomposition collider on a car sprite](<https://github.com/shnewto/bevy_collider_gen/blob/main/img/convex-decomposition.png?raw=true>)
 
 ## license
 
