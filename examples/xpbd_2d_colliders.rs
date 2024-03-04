@@ -312,7 +312,7 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
     "}
     .into();
 
-    if game_assets.image_handles.get("car_handle").is_some() {
+    if game_assets.image_handles.contains_key("car_handle") {
         let car_controls: String = indoc! {"
             a d (move car)
             1 (reset car transform to initial)
