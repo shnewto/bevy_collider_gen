@@ -3,10 +3,12 @@ use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
 use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::RenderPlugin;
-use bevy_collider_gen::multi_image_edge_translated;
-use bevy_collider_gen::xpbd_2d::{
-    multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
-    single_heightfield_collider_translated,
+use bevy_collider_gen::{
+    xpbd_2d::{
+        multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
+        single_heightfield_collider_translated,
+    },
+    Edges,
 };
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
@@ -126,7 +128,8 @@ pub fn boulders_spawn(
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 
-    let coord_group = multi_image_edge_translated(sprite_image);
+    let edges = Edges::from(sprite_image);
+    let coord_group = edges.multi_image_edge_translated();
     let colliders = multi_convex_polyline_collider_translated(sprite_image);
 
     for (coords, collider) in coord_group.iter().zip(colliders.into_iter()) {
