@@ -1,4 +1,3 @@
-use edges::Edges;
 use bevy::prelude::{Image, Vec2};
 use bevy_xpbd_2d::{
     math::Vector2,
@@ -9,6 +8,7 @@ use bevy_xpbd_2d::{
     },
     prelude::Collider,
 };
+use edges::Edges;
 
 /// Generate a single polyline collider from the image,
 /// coordinates translated to either side of (0, 0)
@@ -28,7 +28,8 @@ pub fn single_polyline_collider_raw(image: &Image) -> Collider {
 /// coordinates translated to either side of (0, 0)
 pub fn single_convex_polyline_collider_translated(image: &Image) -> Option<Collider> {
     let e = Edges::from(image);
-    let points = e.single_image_edge_translated()
+    let points = e
+        .single_image_edge_translated()
         .into_iter()
         .map(Point::from)
         .collect::<Vec<Point<Real>>>();
@@ -39,7 +40,8 @@ pub fn single_convex_polyline_collider_translated(image: &Image) -> Option<Colli
 /// coordinates left alone and all in positive x and y
 pub fn single_convex_polyline_collider_raw(image: &Image) -> Option<Collider> {
     let e = Edges::from(image);
-    let points = e.single_image_edge_raw()
+    let points = e
+        .single_image_edge_raw()
         .into_iter()
         .map(Point::from)
         .collect::<Vec<Point<Real>>>();

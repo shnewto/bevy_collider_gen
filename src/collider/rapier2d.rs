@@ -1,6 +1,6 @@
-use edges::Edges;
 use bevy::prelude::{Image, Vec2};
 use bevy_rapier2d::prelude::{Collider, Real};
+use edges::Edges;
 
 /// Generate a single bevy_rapier2d polyline collider from the image,
 /// coordinates translated to either side of (0, 0)

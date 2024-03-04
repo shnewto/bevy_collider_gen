@@ -8,4 +8,4 @@ pub use collider::rapier2d;
 #[cfg(feature = "xpbd_2d")]
 pub use collider::xpbd_2d;
 
-pub use::edges::Edges;
+pub use ::edges::Edges;
