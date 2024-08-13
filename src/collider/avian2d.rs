@@ -1,5 +1,4 @@
-use bevy::prelude::{Image, Vec2};
-use bevy_xpbd_2d::{
+use avian2d::{
     math::Vector2,
     parry::{
         math::{Point, Real, Vector},
@@ -8,6 +7,7 @@ use bevy_xpbd_2d::{
     },
     prelude::Collider,
 };
+use bevy::prelude::{Image, Vec2};
 use edges::Edges;
 
 /// Generate a single polyline collider from the image,
