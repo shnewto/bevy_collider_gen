@@ -1,10 +1,13 @@
+use avian2d::math::Vector;
+use avian2d::prelude::*;
 use bevy::asset::LoadState;
+use bevy::color::palettes::css;
 use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
 use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::RenderPlugin;
 use bevy_collider_gen::{
-    xpbd_2d::{
+    avian2d::{
         multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
         single_heightfield_collider_translated,
     },
@@ -12,11 +15,6 @@ use bevy_collider_gen::{
 };
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
 use bevy_prototype_lyon::shapes;
-use bevy_xpbd_2d::components::RigidBody;
-use bevy_xpbd_2d::math::Vector;
-use bevy_xpbd_2d::plugins::debug::DebugRender;
-use bevy_xpbd_2d::plugins::{PhysicsDebugPlugin, PhysicsPlugins};
-use bevy_xpbd_2d::resources::Gravity;
 use indoc::indoc;
 use std::collections::HashMap;
 
@@ -52,7 +50,7 @@ pub fn custom_png_spawn(
                 transform: Transform::from_xyz(0.0, 0.0, 0.0),
                 ..default()
             },
-            DebugRender::default().with_collider_color(Color::VIOLET),
+            DebugRender::default().with_collider_color(css::VIOLET.into()),
         ));
     }
 }
@@ -86,7 +84,7 @@ pub fn car_spawn(
         },
         Car { initial_xyz },
         RigidBody::Dynamic,
-        DebugRender::default().with_collider_color(Color::VIOLET),
+        DebugRender::default().with_collider_color(css::VIOLET.into()),
     ));
 }
 
@@ -110,7 +108,7 @@ pub fn terrain_spawn(
             texture: sprite_handle.unwrap().clone(),
             ..default()
         },
-        DebugRender::default().with_collider_color(Color::VIOLET),
+        DebugRender::default().with_collider_color(css::VIOLET.into()),
     ));
 }
 
@@ -138,7 +136,7 @@ pub fn boulders_spawn(
             closed: true,
         };
         let geometry = GeometryBuilder::build_as(&shape);
-        let fill = Fill::color(Color::hex("545454").unwrap());
+        let fill = Fill::color(Srgba::hex("#545454").unwrap());
         let transform = Transform::from_xyz(0., 40., 0.);
 
         commands.spawn((
@@ -147,7 +145,7 @@ pub fn boulders_spawn(
             fill,
             transform,
             RigidBody::Dynamic,
-            DebugRender::default().with_collider_color(Color::VIOLET),
+            DebugRender::default().with_collider_color(css::VIOLET.into()),
         ));
     }
 }
@@ -171,7 +169,6 @@ pub struct GameAsset {
 
 fn main() {
     App::new()
-        .init_state::<AppState>()
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
@@ -193,8 +190,9 @@ fn main() {
                     ..default()
                 }),
         )
+        .init_state::<AppState>()
         .insert_resource(GameAsset::default())
-        .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)))
         .insert_resource(Gravity(Vector::NEG_Y * 1000.0))
         .add_plugins(ShapePlugin)
         .add_plugins(WireframePlugin)
@@ -234,7 +232,9 @@ pub fn check_assets(
         }
     }
 
-    if Some(LoadState::Loaded) != asset_server.get_load_state(game_assets.font_handle.clone()) {
+    if Some(LoadState::Loaded)
+        != asset_server.get_load_state(&game_assets.font_handle.clone().untyped())
+    {
         return;
     }
 
@@ -342,7 +342,7 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
                 style: TextStyle {
                     font: game_assets.font_handle.clone(),
                     font_size: 20.0,
-                    color: Color::rgb(0.9, 0.9, 0.9),
+                    color: Color::srgb(0.9, 0.9, 0.9),
                 },
             }],
             justify: JustifyText::Left,

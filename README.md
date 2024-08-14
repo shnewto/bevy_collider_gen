@@ -8,7 +8,7 @@ a library for generating 2d colliders, for bevy apps, from images with transpare
 
 ## specifying your dependency
 
-by default, both bevy_rapier2d and bevy_xpbd_2d are enabled. this is to help with the out of box experience, specifically, being able to run both examples and tinker.
+by default, both bevy_rapier2d and avian2d (formerly bevy_xpbd_2d) are enabled. this is to help with the out of box experience, specifically, being able to run both examples and tinker.
 
 but you'll probably only want to just use one of the physics engines supported so when you use it in your own crate fill in in the `bevy_collider_gen` dependencies with something like this for `bevy_rapier2d`
 
@@ -20,13 +20,13 @@ features = ["rapier2d"]
 default-features = false
 ```
 
-or this for `bevy_xpbd_2d`
+or this for `avian2d`
 
 ```toml
 [dependencies.bevy_collider_gen]
 # replace "*" with the most recent version of bevy_collider_gen
 version = "*"
-features = ["xpbd_2d"]
+features = ["avian2d"]
 default-features = false
 ```
 
@@ -44,12 +44,12 @@ to see this in action you can run the example, with no args it generates a scene
 cargo run --example rapier2d_colliders
 ```
 
-### bevy_xpbd_2d
+### avian2d
 
-#### note that you must have the xpbd_2d feature enabled
+#### note that you must have the avian2d feature enabled
 
 ```sh
-cargo run --example xpbd_2d_colliders
+cargo run --example avian2d_colliders
 ```
 
 you can also specify a path to an image yourself the example will attempt to generate one or more convex_polyline colliders for the objects it finds

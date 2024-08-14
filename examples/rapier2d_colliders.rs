@@ -149,7 +149,7 @@ pub fn boulders_spawn(
             closed: true,
         };
         let geometry = GeometryBuilder::build_as(&shape);
-        let fill = Fill::color(Color::hex("545454").unwrap());
+        let fill = Fill::color(Srgba::hex("#545454").unwrap());
         let transform = Transform::from_xyz(0., 40., 0.);
 
         commands.spawn((
@@ -181,7 +181,6 @@ pub struct GameAsset {
 
 fn main() {
     App::new()
-        .init_state::<AppState>()
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
@@ -203,8 +202,9 @@ fn main() {
                     ..default()
                 }),
         )
+        .init_state::<AppState>()
         .insert_resource(GameAsset::default())
-        .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)))
         .add_plugins(ShapePlugin)
         .add_plugins(WireframePlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
@@ -250,7 +250,9 @@ pub fn check_assets(
         }
     }
 
-    if Some(LoadState::Loaded) != asset_server.get_load_state(game_assets.font_handle.clone()) {
+    if Some(LoadState::Loaded)
+        != asset_server.get_load_state(&game_assets.font_handle.clone().untyped())
+    {
         return;
     }
 
@@ -358,7 +360,7 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
                 style: TextStyle {
                     font: game_assets.font_handle.clone(),
                     font_size: 20.0,
-                    color: Color::rgb(0.9, 0.9, 0.9),
+                    color: Color::srgb(0.9, 0.9, 0.9),
                 },
             }],
             justify: JustifyText::Left,
