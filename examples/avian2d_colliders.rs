@@ -6,11 +6,9 @@ use bevy::pbr::wireframe::WireframePlugin;
 use bevy::prelude::*;
 use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::RenderPlugin;
+use bevy_collider_gen::avian2d::single_convex_polyline_collider_translated;
 use bevy_collider_gen::{
-    avian2d::{
-        multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
-        single_heightfield_collider_translated,
-    },
+    avian2d::{multi_convex_polyline_collider_translated, single_heightfield_collider_translated},
     Edges,
 };
 use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
@@ -68,7 +66,7 @@ pub fn car_spawn(
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let initial_xyz = Vec3::new(-200.0, -4.0, 0.0);
+    let initial_xyz = Vec3::new(-200.0, -5.0, 0.0);
     let sprite_handle = game_assets.image_handles.get("car_handle");
     if sprite_handle.is_none() {
         return;
@@ -356,17 +354,22 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
     });
 }
 
-pub fn car_movement(mut query: Query<(&Car, &mut Transform)>, keys: Res<ButtonInput<KeyCode>>) {
-    for (car, mut transform) in query.iter_mut() {
+pub fn car_movement(
+    mut query: Query<(&Car, &mut LinearVelocity, &mut Transform)>,
+    keys: Res<ButtonInput<KeyCode>>,
+) {
+    for (car, mut linear_velocity, mut transform) in query.iter_mut() {
         if keys.pressed(KeyCode::KeyD) {
-            transform.translation.x += 5.0;
+            linear_velocity.x += 30.0;
         }
 
         if keys.pressed(KeyCode::KeyA) {
-            transform.translation.x -= 5.0;
+            linear_velocity.x -= 30.0;
         }
 
         if keys.pressed(KeyCode::Digit1) {
+            linear_velocity.x = 0.0;
+            linear_velocity.y = 0.0;
             *transform =
                 Transform::from_xyz(car.initial_xyz.x, car.initial_xyz.y, car.initial_xyz.z);
         }
