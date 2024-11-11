@@ -9,6 +9,7 @@ use avian2d::{
 use bevy_math::prelude::Vec2;
 use bevy_render::prelude::Image;
 use edges::Edges;
+use rayon::prelude::*;
 
 /// Generate a single polyline collider from the image,
 /// coordinates translated to either side of (0, 0)
@@ -33,7 +34,7 @@ pub fn single_convex_polyline_collider_translated(image: &Image) -> Option<Colli
     let e = Edges::from(image);
     let points = e
         .single_image_edge_translated()
-        .into_iter()
+        .into_par_iter()
         .map(Point::from)
         .collect::<Vec<Point<Real>>>();
     SharedShape::convex_polyline(points).map(Collider::from)
@@ -46,7 +47,7 @@ pub fn single_convex_polyline_collider_raw(image: &Image) -> Option<Collider> {
     let e = Edges::from(image);
     let points = e
         .single_image_edge_raw()
-        .into_iter()
+        .into_par_iter()
         .map(Point::from)
         .collect::<Vec<Point<Real>>>();
     SharedShape::convex_polyline(points).map(Collider::from)
@@ -92,7 +93,7 @@ pub fn single_heightfield_collider_raw(image: &Image) -> Collider {
 pub fn multi_polyline_collider_translated(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
-        .into_iter()
+        .into_par_iter()
         .map(|v| Collider::polyline(v, None))
         .collect()
 }
@@ -103,7 +104,7 @@ pub fn multi_polyline_collider_translated(image: &Image) -> Vec<Collider> {
 pub fn multi_polyline_collider_raw(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
-        .into_iter()
+        .into_par_iter()
         .map(|v| Collider::polyline(v, None))
         .collect()
 }
@@ -114,9 +115,12 @@ pub fn multi_polyline_collider_raw(image: &Image) -> Vec<Collider> {
 pub fn multi_convex_polyline_collider_translated(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
-        .into_iter()
+        .into_par_iter()
         .map(|v| {
-            let points = v.into_iter().map(Point::from).collect::<Vec<Point<Real>>>();
+            let points = v
+                .into_par_iter()
+                .map(Point::from)
+                .collect::<Vec<Point<Real>>>();
             SharedShape::convex_polyline(points).map(Collider::from)
         })
         .collect()
@@ -128,9 +132,12 @@ pub fn multi_convex_polyline_collider_translated(image: &Image) -> Vec<Option<Co
 pub fn multi_convex_polyline_collider_raw(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
-        .into_iter()
+        .into_par_iter()
         .map(|v| {
-            let points = v.into_iter().map(Point::from).collect::<Vec<Point<Real>>>();
+            let points = v
+                .into_par_iter()
+                .map(Point::from)
+                .collect::<Vec<Point<Real>>>();
             SharedShape::convex_polyline(points).map(Collider::from)
         })
         .collect()
@@ -142,7 +149,7 @@ pub fn multi_convex_polyline_collider_raw(image: &Image) -> Vec<Option<Collider>
 pub fn multi_heightfield_collider_translated(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
-        .into_iter()
+        .into_par_iter()
         .map(|v| heightfield_collider_from_points(&v))
         .collect()
 }
@@ -153,7 +160,7 @@ pub fn multi_heightfield_collider_translated(image: &Image) -> Vec<Collider> {
 pub fn multi_heightfield_collider_raw(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
-        .into_iter()
+        .into_par_iter()
         .map(|v| heightfield_collider_from_points(&v))
         .collect()
 }
@@ -164,7 +171,7 @@ pub fn multi_heightfield_collider_raw(image: &Image) -> Vec<Collider> {
 pub fn multi_convex_hull_collider_translated(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
-        .into_iter()
+        .into_par_iter()
         .map(Collider::convex_hull)
         .collect()
 }
@@ -175,7 +182,7 @@ pub fn multi_convex_hull_collider_translated(image: &Image) -> Vec<Option<Collid
 pub fn multi_convex_hull_collider_raw(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
-        .into_iter()
+        .into_par_iter()
         .map(Collider::convex_hull)
         .collect()
 }
@@ -208,5 +215,5 @@ fn heights_from_points(points: &[Vec2]) -> Vec<Real> {
         }
     }
 
-    heights.iter().map(|e| e.y).collect::<Vec<Real>>()
+    heights.into_par_iter().map(|e| e.y).collect::<Vec<Real>>()
 }
