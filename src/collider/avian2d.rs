@@ -6,7 +6,8 @@ use avian2d::{
     },
     prelude::Collider,
 };
-use bevy::prelude::{Image, Vec2};
+use bevy_math::prelude::Vec2;
+use bevy_render::prelude::Image;
 use edges::Edges;
 
 /// Generate a single polyline collider from the image,
