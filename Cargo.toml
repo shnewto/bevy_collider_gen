@@ -11,6 +11,10 @@ description = "a library for generating colliders, for bevy apps, from images wi
 keywords = ["bevy", "rapier", "png", "collider", "2d"]
 readme = "README.md"
 
+[lints.clippy]
+cast_precision_loss = { level = "allow", priority = 1 }
+pedantic = { level = "warn", priority = 0 }
+
 [features]
 default = ["avian2d", "rapier2d"]
 avian2d = ["dep:avian2d"]
