@@ -1,18 +1,26 @@
-use avian2d::math::Vector;
-use avian2d::prelude::*;
-use bevy::asset::LoadState;
-use bevy::color::palettes::css;
-use bevy::pbr::wireframe::WireframePlugin;
-use bevy::prelude::*;
-use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
-use bevy::render::RenderPlugin;
-use bevy_collider_gen::avian2d::single_convex_polyline_collider_translated;
+#![allow(clippy::needless_pass_by_value)]
+use avian2d::{math::Vector, prelude::*};
+use bevy::{
+    asset::LoadState,
+    color::palettes::css,
+    pbr::wireframe::WireframePlugin,
+    prelude::*,
+    render::{
+        settings::{RenderCreation, WgpuFeatures, WgpuSettings},
+        RenderPlugin,
+    },
+};
 use bevy_collider_gen::{
-    avian2d::{multi_convex_polyline_collider_translated, single_heightfield_collider_translated},
+    avian2d::{
+        multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
+        single_heightfield_collider_translated,
+    },
     Edges,
 };
-use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
-use bevy_prototype_lyon::shapes;
+use bevy_prototype_lyon::{
+    prelude::{Fill, GeometryBuilder, ShapePlugin},
+    shapes,
+};
 use indoc::indoc;
 use std::collections::HashMap;
 
@@ -25,9 +33,9 @@ use std::collections::HashMap;
 /// w (zoom in)
 /// d (zoom out)
 
-/// Custom PNG: convex_polyline collider
+/// Custom PNG: `convex_polyline` collider
 /// from png path specified as cli argument
-pub fn custom_png_spawn(
+fn custom_png_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -59,9 +67,9 @@ pub struct Car {
     pub initial_xyz: Vec3,
 }
 
-/// Car: convex_polyline collider
+/// Car: `convex_polyline` collider
 /// from assets/sprite/car.png
-pub fn car_spawn(
+fn car_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -88,7 +96,7 @@ pub fn car_spawn(
 
 /// Terrain: heightfield collider
 /// from assets/sprite/terrain.png
-pub fn terrain_spawn(
+fn terrain_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -111,9 +119,9 @@ pub fn terrain_spawn(
 }
 
 /// Boulder: using groups of edge coordinates to create geometry to color fill
-/// multiple convex_polyline colliders
+/// multiple `convex_polyline` colliders
 /// from assets/sprite/boulders.png
-pub fn boulders_spawn(
+fn boulders_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -236,7 +244,7 @@ pub fn check_assets(
         return;
     }
 
-    state.set(AppState::Running)
+    state.set(AppState::Running);
 }
 
 pub fn camera_spawn(mut commands: Commands) {
@@ -247,7 +255,7 @@ pub fn camera_movement(
     mut query: Query<(&Camera, &mut OrthographicProjection, &mut Transform)>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (_, mut projection, mut transform) in query.iter_mut() {
+    for (_, mut projection, mut transform) in &mut query {
         if keys.pressed(KeyCode::ArrowLeft) {
             transform.translation.x += 10.0;
         }
@@ -358,7 +366,7 @@ pub fn car_movement(
     mut query: Query<(&Car, &mut LinearVelocity, &mut Transform)>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (car, mut linear_velocity, mut transform) in query.iter_mut() {
+    for (car, mut linear_velocity, mut transform) in &mut query {
         if keys.pressed(KeyCode::KeyD) {
             linear_velocity.x += 30.0;
         }

@@ -11,6 +11,7 @@ use edges::Edges;
 
 /// Generate a single polyline collider from the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn single_polyline_collider_translated(image: &Image) -> Collider {
     let e = Edges::from(image);
     Collider::polyline(e.single_image_edge_translated(), None)
@@ -18,13 +19,15 @@ pub fn single_polyline_collider_translated(image: &Image) -> Collider {
 
 /// Generate a single polyline collider from the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn single_polyline_collider_raw(image: &Image) -> Collider {
     let e = Edges::from(image);
     Collider::polyline(e.single_image_edge_raw(), None)
 }
 
-/// Generate a single convex_polyline collider from the image,
+/// Generate a single `convex_polyline` collider from the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn single_convex_polyline_collider_translated(image: &Image) -> Option<Collider> {
     let e = Edges::from(image);
     let points = e
@@ -35,8 +38,9 @@ pub fn single_convex_polyline_collider_translated(image: &Image) -> Option<Colli
     SharedShape::convex_polyline(points).map(Collider::from)
 }
 
-/// Generate a single convex_polyline collider from the image,
+/// Generate a single `convex_polyline` collider from the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn single_convex_polyline_collider_raw(image: &Image) -> Option<Collider> {
     let e = Edges::from(image);
     let points = e
@@ -47,16 +51,18 @@ pub fn single_convex_polyline_collider_raw(image: &Image) -> Option<Collider> {
     SharedShape::convex_polyline(points).map(Collider::from)
 }
 
-/// Generate a single convex_hull collider from the image,
+/// Generate a single `convex_hull` collider from the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn single_convex_hull_collider_translated(image: &Image) -> Option<Collider> {
     let e = Edges::from(image);
     let points = e.single_image_edge_translated();
     Collider::convex_hull(points)
 }
 
-/// Generate a single convex_hull collider from the image,
+/// Generate a single `convex_hull` collider from the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn single_convex_hull_collider_raw(image: &Image) -> Option<Collider> {
     let e = Edges::from(image);
     let points = e.single_image_edge_translated();
@@ -65,6 +71,7 @@ pub fn single_convex_hull_collider_raw(image: &Image) -> Option<Collider> {
 
 /// Generate a single heightfield collider from the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn single_heightfield_collider_translated(image: &Image) -> Collider {
     let e = Edges::from(image);
     heightfield_collider_from_points(&e.single_image_edge_translated())
@@ -72,6 +79,7 @@ pub fn single_heightfield_collider_translated(image: &Image) -> Collider {
 
 /// Generate a single heightfield collider from the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn single_heightfield_collider_raw(image: &Image) -> Collider {
     let e = Edges::from(image);
     heightfield_collider_from_points(&e.single_image_edge_raw())
@@ -79,6 +87,7 @@ pub fn single_heightfield_collider_raw(image: &Image) -> Collider {
 
 /// Generate as many polyline colliders as it can find in the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn multi_polyline_collider_translated(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
@@ -89,6 +98,7 @@ pub fn multi_polyline_collider_translated(image: &Image) -> Vec<Collider> {
 
 /// Generate as many polyline colliders as it can find in the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn multi_polyline_collider_raw(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
@@ -97,8 +107,9 @@ pub fn multi_polyline_collider_raw(image: &Image) -> Vec<Collider> {
         .collect()
 }
 
-/// Generate as many convex_polyline colliders as it can find in the image,
+/// Generate as many `convex_polyline` colliders as it can find in the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn multi_convex_polyline_collider_translated(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
@@ -110,8 +121,9 @@ pub fn multi_convex_polyline_collider_translated(image: &Image) -> Vec<Option<Co
         .collect()
 }
 
-/// Generate as many convex_polyline colliders as it can find in the image,
+/// Generate as many `convex_polyline` colliders as it can find in the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn multi_convex_polyline_collider_raw(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
@@ -125,6 +137,7 @@ pub fn multi_convex_polyline_collider_raw(image: &Image) -> Vec<Option<Collider>
 
 /// Generate as many heightfield colliders as it can find in the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn multi_heightfield_collider_translated(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
@@ -135,6 +148,7 @@ pub fn multi_heightfield_collider_translated(image: &Image) -> Vec<Collider> {
 
 /// Generate as many heightfield colliders as it can find in the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn multi_heightfield_collider_raw(image: &Image) -> Vec<Collider> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
@@ -143,8 +157,9 @@ pub fn multi_heightfield_collider_raw(image: &Image) -> Vec<Collider> {
         .collect()
 }
 
-/// Generate as many convex_hull colliders as it can find in the image,
+/// Generate as many `convex_hull` colliders as it can find in the image,
 /// coordinates translated to either side of (0, 0)
+#[must_use]
 pub fn multi_convex_hull_collider_translated(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edge_translated()
@@ -153,8 +168,9 @@ pub fn multi_convex_hull_collider_translated(image: &Image) -> Vec<Option<Collid
         .collect()
 }
 
-/// Generate as many convex_hull colliders as it can find in the image,
+/// Generate as many `convex_hull` colliders as it can find in the image,
 /// coordinates left alone and all in positive x and y
+#[must_use]
 pub fn multi_convex_hull_collider_raw(image: &Image) -> Vec<Option<Collider>> {
     let e = Edges::from(image);
     e.multi_image_edges_raw()
@@ -176,15 +192,18 @@ fn heightfield_collider_from_points(v: &[Vec2]) -> Collider {
 fn heights_from_points(points: &[Vec2]) -> Vec<Real> {
     let mut heights: Vec<Vec2> = vec![];
 
-    for p in points {
-        let elem = heights.iter().enumerate().find(|(_, e)| e.x == p.x);
-        if let Some((i, e)) = elem {
-            if e.y < p.y {
+    for &p in points {
+        if let Some((i, element)) = heights
+            .iter()
+            .enumerate()
+            .find(|(_, e)| (e.x - p.x).abs() <= f32::EPSILON)
+        {
+            if element.y < p.y {
                 heights.remove(i);
-                heights.insert(i, *p);
+                heights.insert(i, p);
             }
         } else {
-            heights.push(*p);
+            heights.push(p);
         }
     }
 
