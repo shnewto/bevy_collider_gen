@@ -255,18 +255,18 @@ pub fn camera_movement(
 ) {
     for (_, mut projection, mut transform) in &mut query {
         if keys.pressed(KeyCode::ArrowLeft) {
-            transform.translation.x += 10.0;
+            transform.translation.x -= 10.0;
         }
         if keys.pressed(KeyCode::ArrowRight) {
-            transform.translation.x -= 10.0;
+            transform.translation.x += 10.0;
         }
 
         if keys.pressed(KeyCode::ArrowUp) {
-            transform.translation.y -= 10.0;
+            transform.translation.y += 10.0;
         }
 
         if keys.pressed(KeyCode::ArrowDown) {
-            transform.translation.y += 10.0;
+            transform.translation.y -= 10.0;
         }
 
         if keys.pressed(KeyCode::KeyW) {
