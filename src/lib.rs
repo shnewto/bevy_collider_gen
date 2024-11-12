@@ -1,11 +1,9 @@
 #![doc = include_str!("../README.md")]
 
-mod collider;
-
-#[cfg(feature = "rapier2d")]
-pub use collider::rapier2d;
+pub use edges::Edges;
 
 #[cfg(feature = "avian2d")]
-pub use collider::avian2d;
-
-pub use ::edges::Edges;
+pub mod avian2d;
+#[cfg(feature = "rapier2d")]
+pub mod rapier2d;
+mod utils;
