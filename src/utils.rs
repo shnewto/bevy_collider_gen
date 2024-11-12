@@ -1,4 +1,3 @@
-use bevy_render::prelude::Image;
 use edges::{Edges, Vec2};
 
 #[cfg(feature = "parallel")]
@@ -88,9 +87,10 @@ fn heights_and_scale(mut points: Vec<Vec2>) -> (Vec<f32>, Vec2) {
 }
 
 /// Generate colliders from the image based on the provided collider type and coordinate handling.
-pub fn generate_collider<F, T>(image: &Image, collider_fn: F, translated: bool) -> T
+pub fn generate_collider<F, R, I>(image: I, collider_fn: F, translated: bool) -> R
 where
-    F: Fn(Vec<Vec2>) -> T,
+    F: Fn(Vec<Vec2>) -> R,
+    Edges: From<I>,
 {
     let edges = Edges::from(image);
     collider_fn(
@@ -101,10 +101,11 @@ where
 }
 
 /// Generate multiple colliders from the image based on the provided collider type and coordinate handling.
-pub fn generate_multi_collider<F, R>(image: &Image, collider_fn: F, translated: bool) -> Vec<R>
+pub fn generate_multi_collider<F, R, I>(image: I, collider_fn: F, translated: bool) -> Vec<R>
 where
     F: Fn(Vec<Vec2>) -> R + Send + Sync,
     R: Send,
+    Edges: From<I>,
 {
     let edges = Edges::from(image);
     into_par_iter!(edges.image_edges(translated))
