@@ -78,10 +78,8 @@ fn custom_png_spawn(
 }
 
 /// for the movement system
-#[derive(Component, Resource)]
-pub struct Car {
-    pub initial_xyz: Vec3,
-}
+#[derive(Component)]
+pub struct Car;
 
 /// Car: `bevy_rapier2d` `convex_polyline` collider
 /// from assets/sprite/car.png
@@ -90,7 +88,6 @@ fn car_spawn(
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let initial_xyz = Vec3::new(-200.0, 2.0, 0.0);
     let sprite_handle = game_assets.image_handles.get("car_handle");
     if sprite_handle.is_none() {
         return;
@@ -100,12 +97,13 @@ fn car_spawn(
     commands.spawn((
         collider,
         RigidBody::Dynamic,
+        Velocity::default(),
         SpriteBundle {
             texture: sprite_handle.unwrap().clone(),
-            transform: Transform::from_xyz(initial_xyz.x, initial_xyz.y, initial_xyz.z),
+            transform: INITIAL_POSITION,
             ..default()
         },
-        Car { initial_xyz },
+        Car,
     ));
 }
 
@@ -381,19 +379,22 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
     });
 }
 
-pub fn car_movement(mut query: Query<(&Car, &mut Transform)>, keys: Res<ButtonInput<KeyCode>>) {
-    for (car, mut transform) in &mut query {
+pub fn car_movement(
+    mut query: Query<(&mut Transform, &mut Velocity), With<Car>>,
+    keys: Res<ButtonInput<KeyCode>>,
+) {
+    for (mut transform, mut velocity) in &mut query {
+        let linear_velocity = &mut velocity.linvel;
         if keys.pressed(KeyCode::KeyD) {
-            transform.translation.x += 5.0;
+            linear_velocity.x += 30.0;
         }
 
         if keys.pressed(KeyCode::KeyA) {
-            transform.translation.x -= 5.0;
+            linear_velocity.x -= 30.0;
         }
-
         if keys.pressed(KeyCode::Digit1) {
-            *transform =
-                Transform::from_xyz(car.initial_xyz.x, car.initial_xyz.y, car.initial_xyz.z);
+            *transform = INITIAL_POSITION;
         }
     }
 }
+const INITIAL_POSITION: Transform = Transform::from_xyz(-200.0, 2.0, 0.0);

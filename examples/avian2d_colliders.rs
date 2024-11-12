@@ -61,11 +61,8 @@ fn custom_png_spawn(
     }
 }
 
-/// for the movement system
-#[derive(Component, Resource)]
-pub struct Car {
-    pub initial_xyz: Vec3,
-}
+#[derive(Component)]
+pub struct Car;
 
 /// Car: `convex_polyline` collider
 /// from assets/sprite/car.png
@@ -88,7 +85,7 @@ fn car_spawn(
             transform: Transform::from_xyz(initial_xyz.x, initial_xyz.y, initial_xyz.z),
             ..default()
         },
-        Car { initial_xyz },
+        Car,
         RigidBody::Dynamic,
         DebugRender::default().with_collider_color(css::VIOLET.into()),
     ));
@@ -363,10 +360,10 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
 }
 
 pub fn car_movement(
-    mut query: Query<(&Car, &mut LinearVelocity, &mut Transform)>,
+    mut query: Query<(&mut LinearVelocity, &mut Transform), With<Car>>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (car, mut linear_velocity, mut transform) in &mut query {
+    for (mut linear_velocity, mut transform) in &mut query {
         if keys.pressed(KeyCode::KeyD) {
             linear_velocity.x += 30.0;
         }
@@ -378,8 +375,8 @@ pub fn car_movement(
         if keys.pressed(KeyCode::Digit1) {
             linear_velocity.x = 0.0;
             linear_velocity.y = 0.0;
-            *transform =
-                Transform::from_xyz(car.initial_xyz.x, car.initial_xyz.y, car.initial_xyz.z);
+            *transform = INITIAL_POSITION;
         }
     }
 }
+const INITIAL_POSITION: Transform = Transform::from_xyz(-200.0, 2.0, 0.0);
