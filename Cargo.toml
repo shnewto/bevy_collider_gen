@@ -16,24 +16,20 @@ cast_precision_loss = { level = "allow", priority = 1 }
 pedantic = { level = "warn", priority = 0 }
 
 [features]
-default = ["avian2d", "rapier2d"]
+default = ["avian2d", "rapier2d", "parallel"]
 avian2d = ["dep:avian2d"]
 rapier2d = ["dep:bevy_rapier2d"]
+parallel = ["dep:rayon"]
 
 [dependencies]
-rayon = "1.10.0"
 edges = "0.4.0"
 bevy_rapier2d = { version = "0.27.0", optional = true }
 avian2d = { version = "0.1.0", optional = true }
+bevy_math = { version = "0.14", default-features = false }
+bevy_render = { version = "0.14", default-features = false }
+rayon = { version = "1.10.0", optional = true }
 thiserror = "2.0.3"
 
-[dependencies.bevy_math]
-version = "0.14"
-default-features = false
-
-[dependencies.bevy_render]
-version = "0.14"
-default-features = false
 
 [dev-dependencies]
 bevy = "0.14"

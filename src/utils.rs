@@ -1,19 +1,33 @@
 use bevy_render::prelude::Image;
 use edges::{Edges, Vec2};
+
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
+
+macro_rules! into_par_iter {
+    ($t: expr) => {{
+        #[cfg(not(feature = "parallel"))]
+        let it = $t.into_iter();
+
+        #[cfg(feature = "parallel")]
+        let it = $t.into_par_iter();
+        it
+    }};
+}
 
 #[cfg(feature = "avian2d")]
 pub mod avian2d {
     use super::{heights_and_scale, Vec2};
 
     use avian2d::parry::{math::Point, shape::SharedShape};
+    #[cfg(feature = "parallel")]
     use rayon::prelude::*;
 
     pub use avian2d::prelude::Collider;
 
     /// Generate `convex_polyline` collider from the points,
     pub fn convex_polyline_collider(points: Vec<Vec2>) -> Option<Collider> {
-        SharedShape::convex_polyline(points.into_par_iter().map(Point::from).collect())
+        SharedShape::convex_polyline(into_par_iter!(points).map(Point::from).collect())
             .map(Collider::from)
     }
 
@@ -58,10 +72,16 @@ pub mod rapier2d {
 /// takes x,y points collects the y values at the top of the image (biggest y)
 fn heights_and_scale(mut points: Vec<Vec2>) -> (Vec<f32>, Vec2) {
     points.sort_by(|p1, p2| p1.x.partial_cmp(&p2.x).unwrap());
-    let heights = points
-        .par_chunk_by(|p1, p2| (p1.x - p2.x).abs() <= f32::EPSILON)
-        .map(|chunk| chunk.iter().map(|p| p.y).reduce(f32::max).unwrap())
-        .collect::<Vec<f32>>();
+    let heights = {
+        #[cfg(not(feature = "parallel"))]
+        let chunk = points.chunk_by(|p1, p2| (p1.x - p2.x).abs() <= f32::EPSILON);
+
+        #[cfg(feature = "parallel")]
+        let chunk = points.par_chunk_by(|p1, p2| (p1.x - p2.x).abs() <= f32::EPSILON);
+        chunk
+    }
+    .map(|chunk| chunk.iter().map(|p| p.y).reduce(f32::max).unwrap())
+    .collect::<Vec<f32>>();
 
     let x_scale = heights.len() - 1;
     (heights, Vec2::new(x_scale as f32, 1.0))
@@ -74,9 +94,7 @@ where
 {
     let edges = Edges::from(image);
     collider_fn(
-        edges
-            .image_edges(translated)
-            .into_par_iter()
+        into_par_iter!(edges.image_edges(translated))
             .flatten()
             .collect(),
     )
@@ -89,9 +107,7 @@ where
     R: Send,
 {
     let edges = Edges::from(image);
-    edges
-        .image_edges(translated)
-        .into_par_iter()
+    into_par_iter!(edges.image_edges(translated))
         .map(collider_fn)
         .collect()
 }
