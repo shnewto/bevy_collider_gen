@@ -1,166 +1,85 @@
+use avian2d::{
+    parry::{math::Point, shape::SharedShape},
+    prelude::Collider,
+};
 use edges::Edges;
 
-use crate::utils::{
-    avian2d::{convex_hull_collider, convex_polyline_collider, heightfield_collider, Collider},
-    generate_collider, generate_multi_collider,
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
+
+use crate::{
+    utils::{generate_collider, generate_multi_collider, heights_and_scale},
+    ColliderType,
 };
 
-/// Generate a single polyline collider from the image,
-/// coordinates translated to either side of (0, 0)
+/// Generate a single collider from the image.
 #[must_use]
-pub fn single_polyline_collider_translated<I>(image: I) -> Collider
+pub fn single_collider<I>(
+    image: I,
+    collider_type: ColliderType,
+    translated: bool,
+) -> Option<Collider>
 where
     Edges: From<I>,
 {
-    generate_collider(image, |points| Collider::polyline(points, None), true)
+    let collider_fn = match collider_type {
+        ColliderType::Polyline => |vertices| Some(Collider::polyline(vertices, None)),
+        ColliderType::ConvexPolyline => |points: Vec<_>| {
+            SharedShape::convex_polyline(
+                {
+                    #[cfg(not(feature = "parallel"))]
+                    let iterator = points.into_iter();
+
+                    #[cfg(feature = "parallel")]
+                    let iterator = points.into_par_iter();
+                    iterator
+                }
+                .map(Point::from)
+                .collect(),
+            )
+            .map(Collider::from)
+        },
+        ColliderType::ConvexHull => |points| Collider::convex_hull(points),
+        ColliderType::Heightfield => |points| {
+            let (heights, scale) = heights_and_scale(points);
+            Some(Collider::heightfield(heights, scale))
+        },
+    };
+    generate_collider(image, collider_fn, translated)
 }
 
-/// Generate a single polyline collider from the image,
-/// coordinates left alone and all in positive x and y
+/// Generate as many colliders as it can find in the image.
 #[must_use]
-pub fn single_polyline_collider_raw<I>(image: I) -> Collider
+pub fn multi_collider<I>(
+    image: I,
+    collider_type: ColliderType,
+    translated: bool,
+) -> Vec<Option<Collider>>
 where
     Edges: From<I>,
 {
-    generate_collider(image, |points| Collider::polyline(points, None), false)
-}
+    let collider_fn = match collider_type {
+        ColliderType::Polyline => |vertices| Some(Collider::polyline(vertices, None)),
+        ColliderType::ConvexPolyline => |points: Vec<_>| {
+            SharedShape::convex_polyline(
+                {
+                    #[cfg(not(feature = "parallel"))]
+                    let iterator = points.into_iter();
 
-/// Generate a single `convex_polyline` collider from the image,
-/// coordinates translated to either side of (0, 0)
-#[must_use]
-pub fn single_convex_polyline_collider_translated<I>(image: I) -> Option<Collider>
-where
-    Edges: From<I>,
-{
-    generate_collider(image, convex_polyline_collider, true)
-}
-
-/// Generate a single `convex_polyline` collider from the image,
-/// coordinates left alone and all in positive x and y
-#[must_use]
-pub fn single_convex_polyline_collider_raw<I>(image: I) -> Option<Collider>
-where
-    Edges: From<I>,
-{
-    generate_collider(image, convex_polyline_collider, false)
-}
-
-/// Generate a single `convex_hull` collider from the image,
-/// coordinates translated to either side of (0, 0)
-#[must_use]
-pub fn single_convex_hull_collider_translated<I>(image: I) -> Option<Collider>
-where
-    Edges: From<I>,
-{
-    generate_collider(image, convex_hull_collider, true)
-}
-
-/// Generate a single `convex_hull` collider from the image,
-/// coordinates left alone and all in positive x and y
-#[must_use]
-pub fn single_convex_hull_collider_raw<I>(image: I) -> Option<Collider>
-where
-    Edges: From<I>,
-{
-    generate_collider(image, convex_hull_collider, false)
-}
-
-/// Generate a single heightfield collider from the image,
-/// coordinates translated to either side of (0, 0)
-#[must_use]
-pub fn single_heightfield_collider_translated<I>(image: I) -> Collider
-where
-    Edges: From<I>,
-{
-    generate_collider(image, heightfield_collider, true)
-}
-
-/// Generate a single heightfield collider from the image,
-/// coordinates left alone and all in positive x and y
-#[must_use]
-pub fn single_heightfield_collider_raw<I>(image: I) -> Collider
-where
-    Edges: From<I>,
-{
-    generate_collider(image, heightfield_collider, false)
-}
-
-/// Generate as many polyline colliders as it can find in the image,
-/// coordinates translated to either side of (0, 0)
-#[must_use]
-pub fn multi_polyline_collider_translated<I>(image: I) -> Vec<Collider>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, |points| Collider::polyline(points, None), true)
-}
-
-/// Generate as many polyline colliders as it can find in the image,
-/// coordinates left alone and all in positive x and y
-#[must_use]
-pub fn multi_polyline_collider_raw<I>(image: I) -> Vec<Collider>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, |points| Collider::polyline(points, None), false)
-}
-
-/// Generate as many `convex_polyline` colliders as it can find in the image,
-/// coordinates translated to either side of (0, 0)
-#[must_use]
-pub fn multi_convex_polyline_collider_translated<I>(image: I) -> Vec<Option<Collider>>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, convex_polyline_collider, true)
-}
-
-/// Generate as many `convex_polyline` colliders as it can find in the image,
-/// coordinates left alone and all in positive x and y
-#[must_use]
-pub fn multi_convex_polyline_collider_raw<I>(image: I) -> Vec<Option<Collider>>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, convex_polyline_collider, false)
-}
-
-/// Generate as many heightfield colliders as it can find in the image,
-/// coordinates translated to either side of (0, 0)
-#[must_use]
-pub fn multi_heightfield_collider_translated<I>(image: I) -> Vec<Collider>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, heightfield_collider, true)
-}
-
-/// Generate as many heightfield colliders as it can find in the image,
-/// coordinates left alone and all in positive x and y
-#[must_use]
-pub fn multi_heightfield_collider_raw<I>(image: I) -> Vec<Collider>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, heightfield_collider, false)
-}
-
-/// Generate as many `convex_hull` colliders as it can find in the image,
-/// coordinates translated to either side of (0, 0)
-#[must_use]
-pub fn multi_convex_hull_collider_translated<I>(image: I) -> Vec<Option<Collider>>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, convex_hull_collider, true)
-}
-
-/// Generate as many `convex_hull` colliders as it can find in the image,
-/// coordinates left alone and all in positive x and y
-#[must_use]
-pub fn multi_convex_hull_collider_raw<I>(image: I) -> Vec<Option<Collider>>
-where
-    Edges: From<I>,
-{
-    generate_multi_collider(image, convex_hull_collider, false)
+                    #[cfg(feature = "parallel")]
+                    let iterator = points.into_par_iter();
+                    iterator
+                }
+                .map(Point::from)
+                .collect(),
+            )
+            .map(Collider::from)
+        },
+        ColliderType::ConvexHull => |points| Collider::convex_hull(points),
+        ColliderType::Heightfield => |points| {
+            let (heights, scale) = heights_and_scale(points);
+            Some(Collider::heightfield(heights, scale))
+        },
+    };
+    generate_multi_collider(image, collider_fn, translated)
 }

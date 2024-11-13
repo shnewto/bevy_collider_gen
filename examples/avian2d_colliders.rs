@@ -11,11 +11,9 @@ use bevy::{
     },
 };
 use bevy_collider_gen::{
-    avian2d::{
-        multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
-        single_heightfield_collider_translated,
-    },
-    Edges,
+    avian2d::{multi_collider, single_collider},
+    edges::Edges,
+    ColliderType,
 };
 use bevy_prototype_lyon::{
     prelude::{Fill, GeometryBuilder, ShapePlugin},
@@ -46,7 +44,7 @@ fn custom_png_spawn(
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 
-    let colliders = multi_convex_polyline_collider_translated(sprite_image);
+    let colliders = multi_collider(sprite_image, ColliderType::ConvexPolyline, true);
     for collider in colliders {
         commands.spawn((
             collider.unwrap(),
@@ -77,7 +75,7 @@ fn car_spawn(
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_convex_polyline_collider_translated(sprite_image).unwrap();
+    let collider = single_collider(sprite_image, ColliderType::ConvexPolyline, true).unwrap();
     commands.spawn((
         collider,
         SpriteBundle {
@@ -103,7 +101,7 @@ fn terrain_spawn(
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_heightfield_collider_translated(sprite_image);
+    let collider = single_collider(sprite_image, ColliderType::Heightfield, true).unwrap();
     commands.spawn((
         collider,
         RigidBody::Static,
@@ -131,7 +129,7 @@ fn boulders_spawn(
 
     let edges = Edges::from(sprite_image);
     let coord_group = edges.multi_image_edge_translated();
-    let colliders = multi_convex_polyline_collider_translated(sprite_image);
+    let colliders = multi_collider(sprite_image, ColliderType::ConvexPolyline, true);
 
     for (coords, collider) in coord_group.iter().zip(colliders.into_iter()) {
         let shape = shapes::Polygon {
