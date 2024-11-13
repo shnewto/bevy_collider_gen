@@ -37,8 +37,8 @@ pub mod avian2d {
 
     /// takes x,y points collects the y values at the top of the image (smallest y)
     /// and creates a heightfield collider
-    pub fn heightfield_collider(v: Vec<Vec2>) -> Collider {
-        let (heights, scale) = heights_and_scale(v);
+    pub fn heightfield_collider(points: Vec<Vec2>) -> Collider {
+        let (heights, scale) = heights_and_scale(points);
         Collider::heightfield(heights, scale)
     }
 }
@@ -62,8 +62,8 @@ pub mod rapier2d {
 
     /// takes x,y points collects the y values at the top of the image (biggest y)
     /// and creates a heightfield collider
-    pub fn heightfield_collider(v: Vec<Vec2>) -> Collider {
-        let (heights, scale) = heights_and_scale(v);
+    pub fn heightfield_collider(points: Vec<Vec2>) -> Collider {
+        let (heights, scale) = heights_and_scale(points);
         Collider::heightfield(heights, scale)
     }
 }
