@@ -16,7 +16,7 @@ cast_precision_loss = { level = "allow", priority = 1 }
 pedantic = { level = "warn", priority = 0 }
 
 [features]
-default = ["avian2d", "rapier2d", "parallel"]
+default = ["rapier2d", "parallel"]
 avian2d = ["dep:avian2d"]
 rapier2d = ["dep:bevy_rapier2d"]
 parallel = ["dep:rayon"]
