@@ -8,6 +8,9 @@ pub mod avian2d;
 pub mod rapier2d;
 mod utils;
 
+/// An enumeration representing the different types of colliders that can be created.
+///
+/// This enum is used to specify the type of collider when generating colliders from images or other sources.
 #[derive(Clone, Copy, Debug)]
 pub enum ColliderType {
     Polyline,
