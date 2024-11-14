@@ -43,7 +43,7 @@ where
 }
 
 /// Generate multiple colliders from the image based on the provided collider type and coordinate handling.
-pub fn generate_multi_collider<F, R, I>(image: I, collider_fn: F, translate: bool) -> Vec<R>
+pub fn generate_colliders<F, R, I>(image: I, collider_fn: F, translate: bool) -> Vec<R>
 where
     F: Fn(Vec<Vec2>) -> R + Send + Sync,
     R: Send,
