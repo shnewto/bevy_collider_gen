@@ -36,7 +36,7 @@ fn to_collider(collider_type: ColliderType, points: Vec<Vec2>) -> Option<Collide
 pub fn generate_collider<I>(
     image: I,
     collider_type: ColliderType,
-    translated: bool,
+    translate: bool,
 ) -> Option<Collider>
 where
     Edges: From<I>,
@@ -52,7 +52,7 @@ where
 pub fn generate_colliders<I>(
     image: I,
     collider_type: ColliderType,
-    translated: bool,
+    translate: bool,
 ) -> Vec<Option<Collider>>
 where
     Edges: From<I>,
