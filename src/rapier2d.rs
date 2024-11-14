@@ -1,10 +1,7 @@
 use bevy_rapier2d::prelude::Collider;
 use edges::{Edges, Vec2};
 
-use crate::{
-    utils::{generate_collider, generate_multi_collider, heights_and_scale},
-    ColliderType,
-};
+use crate::{utils::heights_and_scale, ColliderType};
 
 fn to_collider(collider_type: ColliderType, points: Vec<Vec2>) -> Option<Collider> {
     match collider_type {
@@ -19,7 +16,7 @@ fn to_collider(collider_type: ColliderType, points: Vec<Vec2>) -> Option<Collide
 }
 
 #[must_use]
-pub fn single_collider<I>(
+pub fn generate_collider<I>(
     image: I,
     collider_type: ColliderType,
     translate: bool,
@@ -35,7 +32,7 @@ where
 }
 
 #[must_use]
-pub fn multi_collider<I>(
+pub fn generate_colliders<I>(
     image: I,
     collider_type: ColliderType,
     translate: bool,
