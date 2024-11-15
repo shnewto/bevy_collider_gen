@@ -30,7 +30,7 @@ rayon = { version = "1.10.0", optional = true }
 version = "0.27"
 optional = true
 default-features = false
-features = ["dim2"]
+features = ["dim2", "headless"]
 
 [dependencies.avian2d]
 version = "0.1"
