@@ -1,18 +1,24 @@
-use avian2d::math::Vector;
-use avian2d::prelude::*;
-use bevy::asset::LoadState;
-use bevy::color::palettes::css;
-use bevy::pbr::wireframe::WireframePlugin;
-use bevy::prelude::*;
-use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
-use bevy::render::RenderPlugin;
-use bevy_collider_gen::avian2d::single_convex_polyline_collider_translated;
-use bevy_collider_gen::{
-    avian2d::{multi_convex_polyline_collider_translated, single_heightfield_collider_translated},
-    Edges,
+#![allow(clippy::needless_pass_by_value)]
+use avian2d::{math::Vector, prelude::*};
+use bevy::{
+    asset::LoadState,
+    color::palettes::css,
+    pbr::wireframe::WireframePlugin,
+    prelude::*,
+    render::{
+        settings::{RenderCreation, WgpuFeatures, WgpuSettings},
+        RenderPlugin,
+    },
 };
-use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
-use bevy_prototype_lyon::shapes;
+use bevy_collider_gen::{
+    avian2d::{generate_collider, generate_colliders},
+    edges::Edges,
+    ColliderType,
+};
+use bevy_prototype_lyon::{
+    prelude::{Fill, GeometryBuilder, ShapePlugin},
+    shapes,
+};
 use indoc::indoc;
 use std::collections::HashMap;
 
@@ -25,9 +31,9 @@ use std::collections::HashMap;
 /// w (zoom in)
 /// d (zoom out)
 
-/// Custom PNG: convex_polyline collider
+/// Custom PNG: `convex_polyline` collider
 /// from png path specified as cli argument
-pub fn custom_png_spawn(
+fn custom_png_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -38,7 +44,7 @@ pub fn custom_png_spawn(
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 
-    let colliders = multi_convex_polyline_collider_translated(sprite_image);
+    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
     for collider in colliders {
         commands.spawn((
             collider.unwrap(),
@@ -53,15 +59,12 @@ pub fn custom_png_spawn(
     }
 }
 
-/// for the movement system
-#[derive(Component, Resource)]
-pub struct Car {
-    pub initial_xyz: Vec3,
-}
+#[derive(Component)]
+pub struct Car;
 
-/// Car: convex_polyline collider
+/// Car: `convex_polyline` collider
 /// from assets/sprite/car.png
-pub fn car_spawn(
+fn car_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -72,7 +75,7 @@ pub fn car_spawn(
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_convex_polyline_collider_translated(sprite_image).unwrap();
+    let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline, true).unwrap();
     commands.spawn((
         collider,
         SpriteBundle {
@@ -80,7 +83,7 @@ pub fn car_spawn(
             transform: Transform::from_xyz(initial_xyz.x, initial_xyz.y, initial_xyz.z),
             ..default()
         },
-        Car { initial_xyz },
+        Car,
         RigidBody::Dynamic,
         DebugRender::default().with_collider_color(css::VIOLET.into()),
     ));
@@ -88,7 +91,7 @@ pub fn car_spawn(
 
 /// Terrain: heightfield collider
 /// from assets/sprite/terrain.png
-pub fn terrain_spawn(
+fn terrain_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -98,7 +101,7 @@ pub fn terrain_spawn(
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_heightfield_collider_translated(sprite_image);
+    let collider = generate_collider(sprite_image, ColliderType::Heightfield, true).unwrap();
     commands.spawn((
         collider,
         RigidBody::Static,
@@ -111,9 +114,9 @@ pub fn terrain_spawn(
 }
 
 /// Boulder: using groups of edge coordinates to create geometry to color fill
-/// multiple convex_polyline colliders
+/// multiple `convex_polyline` colliders
 /// from assets/sprite/boulders.png
-pub fn boulders_spawn(
+fn boulders_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -126,7 +129,7 @@ pub fn boulders_spawn(
 
     let edges = Edges::from(sprite_image);
     let coord_group = edges.multi_image_edge_translated();
-    let colliders = multi_convex_polyline_collider_translated(sprite_image);
+    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
 
     for (coords, collider) in coord_group.iter().zip(colliders.into_iter()) {
         let shape = shapes::Polygon {
@@ -169,6 +172,7 @@ fn main() {
     App::new()
         .add_plugins(
             DefaultPlugins
+                .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "colliders".to_string(),
@@ -236,7 +240,7 @@ pub fn check_assets(
         return;
     }
 
-    state.set(AppState::Running)
+    state.set(AppState::Running);
 }
 
 pub fn camera_spawn(mut commands: Commands) {
@@ -247,20 +251,20 @@ pub fn camera_movement(
     mut query: Query<(&Camera, &mut OrthographicProjection, &mut Transform)>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (_, mut projection, mut transform) in query.iter_mut() {
+    for (_, mut projection, mut transform) in &mut query {
         if keys.pressed(KeyCode::ArrowLeft) {
-            transform.translation.x += 10.0;
+            transform.translation.x -= 10.0;
         }
         if keys.pressed(KeyCode::ArrowRight) {
-            transform.translation.x -= 10.0;
+            transform.translation.x += 10.0;
         }
 
         if keys.pressed(KeyCode::ArrowUp) {
-            transform.translation.y -= 10.0;
+            transform.translation.y += 10.0;
         }
 
         if keys.pressed(KeyCode::ArrowDown) {
-            transform.translation.y += 10.0;
+            transform.translation.y -= 10.0;
         }
 
         if keys.pressed(KeyCode::KeyW) {
@@ -355,10 +359,10 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
 }
 
 pub fn car_movement(
-    mut query: Query<(&Car, &mut LinearVelocity, &mut Transform)>,
+    mut query: Query<(&mut LinearVelocity, &mut Transform), With<Car>>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (car, mut linear_velocity, mut transform) in query.iter_mut() {
+    for (mut linear_velocity, mut transform) in &mut query {
         if keys.pressed(KeyCode::KeyD) {
             linear_velocity.x += 30.0;
         }
@@ -370,8 +374,8 @@ pub fn car_movement(
         if keys.pressed(KeyCode::Digit1) {
             linear_velocity.x = 0.0;
             linear_velocity.y = 0.0;
-            *transform =
-                Transform::from_xyz(car.initial_xyz.x, car.initial_xyz.y, car.initial_xyz.z);
+            *transform = INITIAL_POSITION;
         }
     }
 }
+const INITIAL_POSITION: Transform = Transform::from_xyz(-200.0, 2.0, 0.0);

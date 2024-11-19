@@ -1,17 +1,22 @@
-use bevy::asset::LoadState;
-use bevy::pbr::wireframe::WireframePlugin;
-use bevy::prelude::*;
-use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
-use bevy::render::RenderPlugin;
-use bevy_collider_gen::{
-    rapier2d::{
-        multi_convex_polyline_collider_translated, single_convex_polyline_collider_translated,
-        single_heightfield_collider_translated,
+#![allow(clippy::needless_pass_by_value)]
+use bevy::{
+    asset::LoadState,
+    pbr::wireframe::WireframePlugin,
+    prelude::*,
+    render::{
+        settings::{RenderCreation, WgpuFeatures, WgpuSettings},
+        RenderPlugin,
     },
-    Edges,
 };
-use bevy_prototype_lyon::prelude::{Fill, GeometryBuilder, ShapePlugin};
-use bevy_prototype_lyon::shapes;
+use bevy_collider_gen::{
+    edges::Edges,
+    rapier2d::{generate_collider, generate_colliders},
+    ColliderType,
+};
+use bevy_prototype_lyon::{
+    prelude::{Fill, GeometryBuilder, ShapePlugin},
+    shapes,
+};
 use bevy_rapier2d::prelude::*;
 use indoc::indoc;
 use std::collections::HashMap;
@@ -25,9 +30,9 @@ use std::collections::HashMap;
 /// w (zoom in)
 /// d (zoom out)
 
-/// Custom PNG: bevy_rapier2d convex_polyline collider
+/// Custom PNG: `bevy_rapier2d` `convex_polyline` collider
 /// from png path specified as cli argument
-pub fn custom_png_spawn(
+fn custom_png_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -38,7 +43,7 @@ pub fn custom_png_spawn(
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 
-    let colliders = multi_convex_polyline_collider_translated(sprite_image);
+    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
     for collider in colliders {
         commands.spawn((
             collider.unwrap(),
@@ -71,40 +76,38 @@ pub fn custom_png_spawn(
 }
 
 /// for the movement system
-#[derive(Component, Resource)]
-pub struct Car {
-    pub initial_xyz: Vec3,
-}
+#[derive(Component)]
+pub struct Car;
 
-/// Car: bevy_rapier2d convex_polyline collider
+/// Car: `bevy_rapier2d` `convex_polyline` collider
 /// from assets/sprite/car.png
-pub fn car_spawn(
+fn car_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let initial_xyz = Vec3::new(-200.0, 2.0, 0.0);
     let sprite_handle = game_assets.image_handles.get("car_handle");
     if sprite_handle.is_none() {
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_convex_polyline_collider_translated(sprite_image).unwrap();
+    let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline, true).unwrap();
     commands.spawn((
         collider,
         RigidBody::Dynamic,
+        Velocity::default(),
         SpriteBundle {
             texture: sprite_handle.unwrap().clone(),
-            transform: Transform::from_xyz(initial_xyz.x, initial_xyz.y, initial_xyz.z),
+            transform: INITIAL_POSITION,
             ..default()
         },
-        Car { initial_xyz },
+        Car,
     ));
 }
 
-/// Terrain: bevy_rapier2d heightfield collider
+/// Terrain: `bevy_rapier2d` heightfield collider
 /// from assets/sprite/terrain.png
-pub fn terrain_spawn(
+fn terrain_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -114,7 +117,7 @@ pub fn terrain_spawn(
         return;
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = single_heightfield_collider_translated(sprite_image);
+    let collider = generate_collider(sprite_image, ColliderType::Heightfield, true).unwrap();
     commands.spawn((
         collider,
         RigidBody::Fixed,
@@ -126,9 +129,9 @@ pub fn terrain_spawn(
 }
 
 /// Boulder: using groups of edge coordinates to create geometry to color fill
-/// multiple bevy_rapier2d convex_polyline colliders
+/// multiple `bevy_rapier2d` `convex_polyline` colliders
 /// from assets/sprite/boulders.png
-pub fn boulders_spawn(
+fn boulders_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
@@ -141,7 +144,7 @@ pub fn boulders_spawn(
 
     let edges = Edges::from(sprite_image);
     let coord_group = edges.multi_image_edge_translated();
-    let colliders = multi_convex_polyline_collider_translated(sprite_image);
+    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
 
     for (coords, collider) in coord_group.iter().zip(colliders.into_iter()) {
         let shape = shapes::Polygon {
@@ -183,6 +186,7 @@ fn main() {
     App::new()
         .add_plugins(
             DefaultPlugins
+                .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "colliders".to_string(),
@@ -207,7 +211,7 @@ fn main() {
         .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)))
         .add_plugins(ShapePlugin)
         .add_plugins(WireframePlugin)
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugins(RapierDebugRenderPlugin {
             style: DebugRenderStyle {
                 collider_fixed_color: [360., 100., 100., 1.],
@@ -256,7 +260,7 @@ pub fn check_assets(
         return;
     }
 
-    state.set(AppState::Running)
+    state.set(AppState::Running);
 }
 
 pub fn camera_spawn(mut commands: Commands) {
@@ -267,20 +271,20 @@ pub fn camera_movement(
     mut query: Query<(&Camera, &mut OrthographicProjection, &mut Transform)>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (_, mut projection, mut transform) in query.iter_mut() {
+    for (_, mut projection, mut transform) in &mut query {
         if keys.pressed(KeyCode::ArrowLeft) {
-            transform.translation.x += 10.0;
+            transform.translation.x -= 10.0;
         }
         if keys.pressed(KeyCode::ArrowRight) {
-            transform.translation.x -= 10.0;
+            transform.translation.x += 10.0;
         }
 
         if keys.pressed(KeyCode::ArrowUp) {
-            transform.translation.y -= 10.0;
+            transform.translation.y += 10.0;
         }
 
         if keys.pressed(KeyCode::ArrowDown) {
-            transform.translation.y += 10.0;
+            transform.translation.y -= 10.0;
         }
 
         if keys.pressed(KeyCode::KeyW) {
@@ -374,19 +378,22 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
     });
 }
 
-pub fn car_movement(mut query: Query<(&Car, &mut Transform)>, keys: Res<ButtonInput<KeyCode>>) {
-    for (car, mut transform) in query.iter_mut() {
+pub fn car_movement(
+    mut query: Query<(&mut Transform, &mut Velocity), With<Car>>,
+    keys: Res<ButtonInput<KeyCode>>,
+) {
+    for (mut transform, mut velocity) in &mut query {
+        let linear_velocity = &mut velocity.linvel;
         if keys.pressed(KeyCode::KeyD) {
-            transform.translation.x += 5.0;
+            linear_velocity.x += 30.0;
         }
 
         if keys.pressed(KeyCode::KeyA) {
-            transform.translation.x -= 5.0;
+            linear_velocity.x -= 30.0;
         }
-
         if keys.pressed(KeyCode::Digit1) {
-            *transform =
-                Transform::from_xyz(car.initial_xyz.x, car.initial_xyz.y, car.initial_xyz.z);
+            *transform = INITIAL_POSITION;
         }
     }
 }
+const INITIAL_POSITION: Transform = Transform::from_xyz(-200.0, 2.0, 0.0);
