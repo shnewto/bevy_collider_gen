@@ -46,12 +46,22 @@ bevy = "0.14"
 bevy_prototype_lyon = "0.12"
 indoc = "2.0.4"
 
+[dev-dependencies.bevy_rapier2d]
+version = "0.27"
+default-features = false
+features = ["dim2", "headless", "debug-render-2d"]
+
+[dev-dependencies.avian2d]
+version = "0.1"
+default-features = false
+features = ["2d", "parry-f32", "debug-plugin"]
+
 [[example]]
 name = "avian2d_colliders"
 path = "examples/avian2d_colliders.rs"
-required-features = ["avian2d", "avian2d/debug-plugin"]
+required-features = ["avian2d"]
 
 [[example]]
 name = "rapier2d_colliders"
 path = "examples/rapier2d_colliders.rs"
-required-features = ["rapier2d", "bevy_rapier2d/debug-render-2d"]
+required-features = ["rapier2d"]

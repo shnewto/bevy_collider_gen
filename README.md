@@ -42,13 +42,13 @@ it generates a scene with various colliders using PNG's in the `assets/sprite` d
 ### bevy_rapier2d
 
 ```sh
-cargo run --example rapier2d_colliders -F "bevy_rapier2d/debug-render-2d"
+cargo run --example rapier2d_colliders
 ```
 
 ### avian2d
 
 ```sh
-cargo run --example avian2d_colliders -F "avian2d, avian2d/debug-plugin"
+cargo run --example avian2d_colliders -F avian2d
 ```
 
 You can also specify a path to an image yourself the example will attempt to
