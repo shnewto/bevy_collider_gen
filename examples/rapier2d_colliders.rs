@@ -1,28 +1,17 @@
 #![allow(clippy::needless_pass_by_value)]
-use bevy::{
-    asset::LoadState,
-    pbr::wireframe::WireframePlugin,
-    prelude::*,
-    render::{
-        settings::{RenderCreation, WgpuFeatures, WgpuSettings},
-        RenderPlugin,
-    },
-};
+use bevy::{asset::LoadState, color::palettes::css, prelude::*};
 use bevy_collider_gen::{
     edges::Edges,
     rapier2d::{generate_collider, generate_colliders},
     ColliderType,
 };
-use bevy_prototype_lyon::{
-    prelude::{Fill, GeometryBuilder, ShapePlugin},
-    shapes,
-};
+use bevy_prototype_lyon::{prelude::*, shapes};
 use bevy_rapier2d::prelude::*;
 use indoc::indoc;
 use std::collections::HashMap;
 
-/// Colliders (or, with no png path specified, Car + Boulder + Terrain)
-/// Illustrating how to use PNG files w transparency to generate colliders (and geometry)
+/// Colliders: Car + Boulder + Terrain
+/// Illustrating how to use PNG files with transparency to generate colliders (and geometry)
 /// for 2d sprites.
 ///
 /// Controls
@@ -30,49 +19,29 @@ use std::collections::HashMap;
 /// w (zoom in)
 /// d (zoom out)
 
-/// Custom PNG: `bevy_rapier2d` `convex_polyline` collider
+/// Custom PNG: `convex_polyline` colliders
 /// from png path specified as cli argument
 fn custom_png_spawn(
     mut commands: Commands,
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let sprite_handle = game_assets.image_handles.get("custom_png");
-    if sprite_handle.is_none() {
+    let Some(sprite_handle) = game_assets.image_handles.get("custom_png") else {
         return;
-    }
-    let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-
+    };
+    let sprite_image = image_assets.get(sprite_handle).unwrap();
     let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
+
     for collider in colliders {
         commands.spawn((
             collider.unwrap(),
             RigidBody::Fixed,
             SpriteBundle {
-                texture: sprite_handle.unwrap().clone(),
-                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                texture: sprite_handle.clone(),
                 ..default()
             },
         ));
     }
-
-    //
-    // An approach to generating convex decomposition colliders for your sprites with this crate
-    //
-
-    // let edge_coordinate_groups = multi_image_edge_translated(sprite_image);
-    // for coords in edge_coordinate_groups {
-    //     let indices: Vec<[u32; 2]> = (0..coords.len()).map(|i| [i as u32, i as u32]).collect();
-    //     let collider = Collider::convex_decomposition(&coords, &indices);
-    //     commands.spawn((
-    //         collider,
-    //         RigidBody::Fixed,
-    //         SpriteBundle {
-    //             texture: sprite_handle.unwrap().clone(),
-    //             ..default()
-    //         },
-    //     ));
-    // }
 }
 
 /// for the movement system
@@ -86,18 +55,18 @@ fn car_spawn(
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let sprite_handle = game_assets.image_handles.get("car_handle");
-    if sprite_handle.is_none() {
+    let Some(sprite_handle) = game_assets.image_handles.get("car") else {
         return;
-    }
-    let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-    let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline, true).unwrap();
+    };
+    let sprite_image = image_assets.get(sprite_handle).unwrap();
+    let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline, true);
+
     commands.spawn((
-        collider,
+        collider.unwrap(),
         RigidBody::Dynamic,
         Velocity::default(),
         SpriteBundle {
-            texture: sprite_handle.unwrap().clone(),
+            texture: sprite_handle.clone(),
             transform: INITIAL_POSITION,
             ..default()
         },
@@ -112,17 +81,17 @@ fn terrain_spawn(
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let sprite_handle = game_assets.image_handles.get("terrain_handle");
-    if sprite_handle.is_none() {
+    let Some(sprite_handle) = game_assets.image_handles.get("terrain") else {
         return;
-    }
-    let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
+    };
+    let sprite_image = image_assets.get(sprite_handle).unwrap();
     let collider = generate_collider(sprite_image, ColliderType::Heightfield, true).unwrap();
+
     commands.spawn((
         collider,
         RigidBody::Fixed,
         SpriteBundle {
-            texture: sprite_handle.unwrap().clone(),
+            texture: sprite_handle.clone(),
             ..default()
         },
     ));
@@ -136,30 +105,28 @@ fn boulders_spawn(
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let sprite_handle = game_assets.image_handles.get("boulders");
-    if sprite_handle.is_none() {
+    let Some(sprite_handle) = game_assets.image_handles.get("boulders") else {
         return;
-    }
-    let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-
+    };
+    let sprite_image = image_assets.get(sprite_handle).unwrap();
     let edges = Edges::from(sprite_image);
     let coord_group = edges.multi_image_edge_translated();
     let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
 
-    for (coords, collider) in coord_group.iter().zip(colliders.into_iter()) {
+    for (coords, collider) in coord_group.into_iter().zip(colliders.into_iter()) {
         let shape = shapes::Polygon {
-            points: coords.clone(),
+            points: coords,
             closed: true,
         };
-        let geometry = GeometryBuilder::build_as(&shape);
-        let fill = Fill::color(Srgba::hex("#545454").unwrap());
-        let transform = Transform::from_xyz(0., 40., 0.);
 
         commands.spawn((
-            geometry,
-            fill,
-            transform,
             collider.unwrap(),
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shape),
+                ..default()
+            },
+            Fill::color(css::GRAY),
+            Stroke::new(css::BLACK, 1.),
             RigidBody::Dynamic,
         ));
     }
@@ -176,15 +143,15 @@ pub enum AppState {
     Running,
 }
 
-#[derive(Component, Resource, Default)]
+#[derive(Resource, Default)]
 pub struct GameAsset {
     pub font_handle: Handle<Font>,
-    pub image_handles: HashMap<String, Handle<Image>>,
+    pub image_handles: HashMap<&'static str, Handle<Image>>,
 }
 
 fn main() {
     App::new()
-        .add_plugins(
+        .add_plugins((
             DefaultPlugins
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
@@ -197,38 +164,30 @@ fn main() {
                 .set(AssetPlugin {
                     file_path: ".".to_string(),
                     ..default()
-                })
-                .set(RenderPlugin {
-                    render_creation: RenderCreation::Automatic(WgpuSettings {
-                        features: WgpuFeatures::POLYGON_MODE_LINE,
-                        ..default()
-                    }),
-                    ..default()
                 }),
-        )
-        .init_state::<AppState>()
-        .insert_resource(GameAsset::default())
-        .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)))
-        .add_plugins(ShapePlugin)
-        .add_plugins(WireframePlugin)
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugins(RapierDebugRenderPlugin {
-            style: DebugRenderStyle {
-                collider_fixed_color: [360., 100., 100., 1.],
-                collider_dynamic_color: [360., 100., 100., 1.],
+            ShapePlugin,
+            RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.),
+            #[cfg(debug_assertions)]
+            RapierDebugRenderPlugin {
+                style: DebugRenderStyle {
+                    collider_fixed_color: [360., 100., 100., 1.],
+                    collider_dynamic_color: [360., 100., 100., 1.],
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        })
-        .add_systems(OnEnter(AppState::Loading), load_assets)
+        ))
+        .init_state::<AppState>()
+        .insert_resource(GameAsset::default())
+        .add_systems(Startup, load_assets)
         .add_systems(
             OnExit(AppState::Loading),
             (
                 camera_spawn,
-                custom_png_spawn,
                 car_spawn,
                 terrain_spawn,
                 boulders_spawn,
+                custom_png_spawn,
                 controls_text_spawn,
             ),
         )
@@ -248,19 +207,75 @@ pub fn check_assets(
     game_assets: Res<GameAsset>,
     mut state: ResMut<NextState<AppState>>,
 ) {
-    for h in game_assets.image_handles.values() {
-        if Some(LoadState::Loaded) != asset_server.get_load_state(h) {
-            return;
-        }
-    }
-
-    if Some(LoadState::Loaded)
-        != asset_server.get_load_state(&game_assets.font_handle.clone().untyped())
+    let all_images_loaded = game_assets.image_handles.values().all(|handle| {
+        asset_server
+            .get_load_state(handle)
+            .is_some_and(|state| matches!(state, LoadState::Loaded))
+    });
+    let font_load_state = asset_server.get_load_state(&game_assets.font_handle.clone());
+    if all_images_loaded && font_load_state.is_some_and(|state| matches!(state, LoadState::Loaded))
     {
-        return;
+        state.set(AppState::Running);
     }
+}
 
-    state.set(AppState::Running);
+pub fn load_assets(asset_server: Res<AssetServer>, mut game_assets: ResMut<GameAsset>) {
+    game_assets.font_handle = asset_server.load("assets/font/NotoSansMono-Bold.ttf");
+    game_assets.image_handles = HashMap::from([
+        ("car", asset_server.load("assets/sprite/car.png")),
+        ("terrain", asset_server.load("assets/sprite/terrain.png")),
+        ("boulders", asset_server.load("assets/sprite/boulders.png")),
+    ]);
+    if let Some(png_path) = std::env::args().nth(1) {
+        info!("Loading {}", png_path);
+        game_assets
+            .image_handles
+            .insert("custom_png", asset_server.load(&png_path));
+    }
+}
+
+pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) {
+    let tips_text = indoc! {"
+        controls
+        --------------------
+        ← ↑ ↓ → (pan camera)
+        w (zoom in)
+        s (zoom out)
+        a d (move car)
+        1 (reset car transform to initial)
+    "};
+
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                width: Val::Px(100.),
+                height: Val::Px(10.),
+                position_type: PositionType::Absolute,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::FlexStart,
+                left: Val::Px(80.),
+                bottom: Val::Px(600.),
+                ..default()
+            },
+            ..Default::default()
+        })
+        .with_children(|parent| {
+            parent.spawn(TextBundle {
+                text: Text {
+                    sections: vec![TextSection {
+                        value: tips_text.to_string(),
+                        style: TextStyle {
+                            font: game_assets.font_handle.clone(),
+                            font_size: 20.,
+                            color: Color::srgb(0.9, 0.9, 0.9),
+                        },
+                    }],
+                    justify: JustifyText::Left,
+                    ..default()
+                },
+                ..Default::default()
+            });
+        });
 }
 
 pub fn camera_spawn(mut commands: Commands) {
@@ -268,114 +283,22 @@ pub fn camera_spawn(mut commands: Commands) {
 }
 
 pub fn camera_movement(
-    mut query: Query<(&Camera, &mut OrthographicProjection, &mut Transform)>,
+    mut query: Query<(&mut OrthographicProjection, &mut Transform), With<Camera>>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (_, mut projection, mut transform) in &mut query {
-        if keys.pressed(KeyCode::ArrowLeft) {
-            transform.translation.x -= 10.0;
-        }
-        if keys.pressed(KeyCode::ArrowRight) {
-            transform.translation.x += 10.0;
-        }
-
-        if keys.pressed(KeyCode::ArrowUp) {
-            transform.translation.y += 10.0;
-        }
-
-        if keys.pressed(KeyCode::ArrowDown) {
-            transform.translation.y -= 10.0;
-        }
-
-        if keys.pressed(KeyCode::KeyW) {
-            projection.scale -= 0.01;
-        }
-
-        if keys.pressed(KeyCode::KeyS) {
-            projection.scale += 0.01;
+    for (mut projection, mut transform) in &mut query {
+        for key in keys.get_pressed() {
+            match key {
+                KeyCode::ArrowUp => transform.translation.y += 10.,
+                KeyCode::ArrowDown => transform.translation.y -= 10.,
+                KeyCode::ArrowLeft => transform.translation.x -= 10.,
+                KeyCode::ArrowRight => transform.translation.x += 10.,
+                KeyCode::KeyW => projection.scale -= 0.01,
+                KeyCode::KeyS => projection.scale += 0.01,
+                _ => {}
+            }
         }
     }
-}
-
-pub fn load_assets(asset_server: Res<AssetServer>, mut game_assets: ResMut<GameAsset>) {
-    let custom_png_path = std::env::args().nth(1);
-    game_assets.font_handle = asset_server.load("assets/font/NotoSansMono-Bold.ttf");
-
-    if let Some(png_path) = custom_png_path {
-        info!("Loading {}", png_path);
-        game_assets.image_handles =
-            HashMap::from([("custom_png".into(), asset_server.load(&png_path))]);
-        return;
-    }
-
-    game_assets.image_handles = HashMap::from([
-        (
-            "car_handle".into(),
-            asset_server.load("assets/sprite/car.png"),
-        ),
-        (
-            "terrain_handle".into(),
-            asset_server.load("assets/sprite/terrain.png"),
-        ),
-        (
-            "boulders".into(),
-            asset_server.load("assets/sprite/boulders.png"),
-        ),
-    ]);
-}
-
-pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) {
-    let mut tips_text: String = indoc! {"
-        controls
-        --------------------
-        ← ↑ ↓ → (pan camera)
-        w (zoom in)
-        s (zoom out)
-    "}
-    .into();
-
-    if game_assets.image_handles.contains_key("car_handle") {
-        let car_controls: String = indoc! {"
-            a d (move car)
-            1 (reset car transform to initial)
-        "}
-        .into();
-
-        tips_text.push_str(&car_controls);
-    }
-
-    let node_bundle = NodeBundle {
-        style: Style {
-            width: Val::Px(100.),
-            height: Val::Px(10.),
-            position_type: PositionType::Absolute,
-            justify_content: JustifyContent::FlexStart,
-            align_items: AlignItems::FlexStart,
-            left: Val::Px(80.0),
-            bottom: Val::Px(600.0),
-            ..default()
-        },
-        ..Default::default()
-    };
-    let text_bundle = TextBundle {
-        text: Text {
-            sections: vec![TextSection {
-                value: tips_text.to_string(),
-                style: TextStyle {
-                    font: game_assets.font_handle.clone(),
-                    font_size: 20.0,
-                    color: Color::srgb(0.9, 0.9, 0.9),
-                },
-            }],
-            justify: JustifyText::Left,
-            ..default()
-        },
-        ..Default::default()
-    };
-
-    commands.spawn(node_bundle).with_children(|parent| {
-        parent.spawn(text_bundle);
-    });
 }
 
 pub fn car_movement(
@@ -384,16 +307,17 @@ pub fn car_movement(
 ) {
     for (mut transform, mut velocity) in &mut query {
         let linear_velocity = &mut velocity.linvel;
-        if keys.pressed(KeyCode::KeyD) {
-            linear_velocity.x += 30.0;
-        }
-
-        if keys.pressed(KeyCode::KeyA) {
-            linear_velocity.x -= 30.0;
-        }
-        if keys.pressed(KeyCode::Digit1) {
-            *transform = INITIAL_POSITION;
+        for key in keys.get_pressed() {
+            match key {
+                KeyCode::KeyA => linear_velocity.x -= 30.,
+                KeyCode::KeyD => linear_velocity.x += 30.,
+                KeyCode::Digit1 => {
+                    *linear_velocity = Vec2::default();
+                    *transform = INITIAL_POSITION;
+                }
+                _ => {}
+            }
         }
     }
 }
-const INITIAL_POSITION: Transform = Transform::from_xyz(-200.0, 2.0, 0.0);
+const INITIAL_POSITION: Transform = Transform::from_xyz(-200., 2., 0.);
