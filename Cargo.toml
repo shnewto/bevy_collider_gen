@@ -11,6 +11,9 @@ description = "a library for generating colliders, for bevy apps, from images wi
 keywords = ["bevy", "rapier", "png", "collider", "2d"]
 readme = "README.md"
 
+exclude = ["assets/*", ".github/*", "examples/*"]
+include = ["/LICENSE-APACHE", "/LICENSE-MIT", "/README.md", "/src/"]
+
 [lints.clippy]
 cast_precision_loss = { level = "allow", priority = 1 }
 pedantic = { level = "warn", priority = 0 }
