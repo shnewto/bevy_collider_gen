@@ -25,34 +25,36 @@ rapier2d = ["dep:bevy_rapier2d"]
 parallel = ["dep:rayon", "avian2d/parallel", "bevy_rapier2d/parallel"]
 
 [dependencies]
-edges = "0.4"
-bevy_math = { version = "0.14", default-features = false }
+edges = "0.5"
+bevy_math = { version = "0.15", default-features = false }
 rayon = { version = "1", optional = true }
 
 [dependencies.bevy_rapier2d]
-version = "0.27"
+version = "0.28"
 optional = true
 default-features = false
 features = ["dim2", "headless"]
 
 [dependencies.avian2d]
-version = "0.1"
+git = "https://github.com/Jondolf/avian"
+branch = "main"
 optional = true
 default-features = false
 features = ["2d", "parry-f32"]
 
 [dev-dependencies]
-bevy = "0.14"
-bevy_prototype_lyon = "0.12"
+bevy = "0.15"
+bevy_prototype_lyon = "0.13"
 indoc = "2.0.4"
 
 [dev-dependencies.bevy_rapier2d]
-version = "0.27"
+version = "0.28"
 default-features = false
 features = ["dim2", "headless", "debug-render-2d"]
 
 [dev-dependencies.avian2d]
-version = "0.1"
+git = "https://github.com/Jondolf/avian"
+branch = "main"
 default-features = false
 features = ["2d", "parry-f32", "debug-plugin"]
 
