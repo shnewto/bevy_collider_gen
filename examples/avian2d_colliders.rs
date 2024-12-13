@@ -111,8 +111,8 @@ fn boulders_spawn(
     }
     let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 
-    let edges = Edges::from(sprite_image);
-    let coord_group = edges.multi_image_edge_translated();
+    let edges = Edges::try_from(sprite_image).unwrap();
+    let coord_group = edges.multi_translated();
     let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline);
 
     for (coords, collider) in coord_group.into_iter().zip(colliders.into_iter()) {

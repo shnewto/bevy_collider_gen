@@ -22,12 +22,14 @@ pedantic = { level = "warn", priority = 0 }
 default = ["rapier2d", "parallel"]
 avian2d = ["dep:avian2d"]
 rapier2d = ["dep:bevy_rapier2d"]
-parallel = ["dep:rayon", "avian2d/parallel", "bevy_rapier2d/parallel"]
+parallel = ["avian2d/parallel", "bevy_rapier2d/parallel", "edges/parallel"]
 
 [dependencies]
-edges = "0.5"
+cfg-if = "1"
+image = { version = "0.25", default-features = false }
+edges = { git = "https://github.com/shnewto/edges", branch = "dev" }
 bevy_math = { version = "0.15", default-features = false }
-rayon = { version = "1", optional = true }
+bevy_image = { version = "0.15", default-features = false }
 
 [dependencies.bevy_rapier2d]
 version = "0.28"

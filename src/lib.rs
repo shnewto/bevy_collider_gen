@@ -1,12 +1,20 @@
 #![doc = include_str!("../README.md")]
 
-pub extern crate edges;
-
 #[cfg(feature = "avian2d")]
 pub mod avian2d;
 #[cfg(feature = "rapier2d")]
 pub mod rapier2d;
+
 mod utils;
+
+pub extern crate edges;
+cfg_if::cfg_if! {
+    if #[cfg(feature = "rapier2d")] {
+        pub use rapier2d::{generate_collider, generate_colliders};
+    } else if #[cfg(feature = "avian2d")] {
+        pub use avian2d::{generate_collider, generate_colliders};
+    }
+}
 
 /// An enumeration representing the different types of colliders that can be created.
 ///

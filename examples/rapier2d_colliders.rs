@@ -1,10 +1,6 @@
 #![allow(clippy::needless_pass_by_value)]
 use bevy::{asset::LoadState, color::palettes::css, prelude::*};
-use bevy_collider_gen::{
-    edges::Edges,
-    rapier2d::{generate_collider, generate_colliders},
-    ColliderType,
-};
+use bevy_collider_gen::{edges::Edges, generate_collider, generate_colliders, ColliderType};
 use bevy_prototype_lyon::{prelude::*, shapes};
 use bevy_rapier2d::prelude::*;
 use indoc::indoc;
@@ -109,8 +105,8 @@ fn boulders_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let edges = Edges::from(sprite_image);
-    let coord_group = edges.multi_image_edge_translated();
+    let edges = Edges::try_from(sprite_image).unwrap();
+    let coord_group = edges.multi_translated();
     let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline);
 
     for (coords, collider) in coord_group.into_iter().zip(colliders.into_iter()) {
