@@ -51,19 +51,11 @@ fn to_collider(collider_type: ColliderType, points: Vec<Vec2>) -> Option<Collide
 /// let collider = generate_collider(image, ColliderType::Polyline, true);
 /// ```
 #[must_use]
-pub fn generate_collider<I>(
-    image: I,
-    collider_type: ColliderType,
-    translate: bool,
-) -> Option<Collider>
+pub fn generate_collider<I>(image: I, collider_type: ColliderType) -> Option<Collider>
 where
     Edges: From<I>,
 {
-    crate::utils::generate_collider(
-        image,
-        |points| to_collider(collider_type, points),
-        translate,
-    )
+    crate::utils::generate_collider(image, |points| to_collider(collider_type, points))
 }
 
 /// Generates multiple colliders from the provided image.
@@ -85,17 +77,9 @@ where
 /// let colliders = generate_colliders(image, ColliderType::Polyline, true);
 /// ```
 #[must_use]
-pub fn generate_colliders<I>(
-    image: I,
-    collider_type: ColliderType,
-    translate: bool,
-) -> Vec<Option<Collider>>
+pub fn generate_colliders<I>(image: I, collider_type: ColliderType) -> Vec<Collider>
 where
     Edges: From<I>,
 {
-    crate::utils::generate_colliders(
-        image,
-        |points| to_collider(collider_type, points),
-        translate,
-    )
+    crate::utils::generate_colliders(image, |points| to_collider(collider_type, points))
 }

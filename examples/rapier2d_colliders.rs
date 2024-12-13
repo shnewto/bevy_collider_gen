@@ -30,14 +30,14 @@ fn custom_png_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
+    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline);
 
     for collider in colliders {
         commands.spawn((
-            collider.unwrap(),
+            collider,
             RigidBody::Fixed,
-            SpriteBundle {
-                texture: sprite_handle.clone(),
+            Sprite {
+                image: sprite_handle.clone(),
                 ..default()
             },
         ));
@@ -59,17 +59,17 @@ fn car_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline, true);
+    let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline).unwrap();
 
     commands.spawn((
-        collider.unwrap(),
+        collider,
         RigidBody::Dynamic,
         Velocity::default(),
-        SpriteBundle {
-            texture: sprite_handle.clone(),
-            transform: INITIAL_POSITION,
+        Sprite {
+            image: sprite_handle.clone(),
             ..default()
         },
+        INITIAL_POSITION,
         Car,
     ));
 }
@@ -85,13 +85,13 @@ fn terrain_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = generate_collider(sprite_image, ColliderType::Heightfield, true).unwrap();
+    let collider = generate_collider(sprite_image, ColliderType::Heightfield).unwrap();
 
     commands.spawn((
         collider,
         RigidBody::Fixed,
-        SpriteBundle {
-            texture: sprite_handle.clone(),
+        Sprite {
+            image: sprite_handle.clone(),
             ..default()
         },
     ));
@@ -111,7 +111,7 @@ fn boulders_spawn(
     let sprite_image = image_assets.get(sprite_handle).unwrap();
     let edges = Edges::from(sprite_image);
     let coord_group = edges.multi_image_edge_translated();
-    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
+    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline);
 
     for (coords, collider) in coord_group.into_iter().zip(colliders.into_iter()) {
         let shape = shapes::Polygon {
@@ -120,7 +120,7 @@ fn boulders_spawn(
         };
 
         commands.spawn((
-            collider.unwrap(),
+            collider,
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
                 ..default()
@@ -246,40 +246,35 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
     "};
 
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Px(100.),
-                height: Val::Px(10.),
-                position_type: PositionType::Absolute,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::FlexStart,
-                left: Val::Px(80.),
-                bottom: Val::Px(600.),
-                ..default()
-            },
-            ..Default::default()
+        .spawn(Node {
+            width: Val::Px(100.),
+            height: Val::Px(10.),
+            position_type: PositionType::Absolute,
+            justify_content: JustifyContent::FlexStart,
+            align_items: AlignItems::FlexStart,
+            left: Val::Px(80.),
+            bottom: Val::Px(600.),
+            ..default()
         })
         .with_children(|parent| {
-            parent.spawn(TextBundle {
-                text: Text {
-                    sections: vec![TextSection {
-                        value: tips_text.to_string(),
-                        style: TextStyle {
-                            font: game_assets.font_handle.clone(),
-                            font_size: 20.,
-                            color: Color::srgb(0.9, 0.9, 0.9),
-                        },
-                    }],
-                    justify: JustifyText::Left,
-                    ..default()
+            parent.spawn((
+                Text(tips_text.to_string()),
+                TextFont {
+                    font: game_assets.font_handle.clone(),
+                    font_size: 20.,
+                    ..Default::default()
                 },
-                ..Default::default()
-            });
+                TextColor(Color::srgb(0.9, 0.9, 0.9)),
+                TextLayout {
+                    justify: JustifyText::Left,
+                    ..Default::default()
+                },
+            ));
         });
 }
 
 pub fn camera_spawn(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 }
 
 pub fn camera_movement(
