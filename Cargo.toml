@@ -27,7 +27,7 @@ parallel = ["avian2d/parallel", "bevy_rapier2d/parallel", "edges/parallel"]
 [dependencies]
 cfg-if = "1"
 image = { version = "0.25", default-features = false }
-edges = { git = "https://github.com/shnewto/edges", branch = "dev" }
+edges = "0.6"
 bevy_math = { version = "0.15", default-features = false }
 bevy_image = { version = "0.15", default-features = false }
 
