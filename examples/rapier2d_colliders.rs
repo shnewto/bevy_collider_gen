@@ -42,6 +42,7 @@ fn custom_png_spawn(
 
 /// for the movement system
 #[derive(Component)]
+#[require(Velocity, RigidBody, Transform(|| INITIAL_POSITION))]
 pub struct Car;
 
 /// Car: `bevy_rapier2d` `convex_polyline` collider
@@ -58,15 +59,12 @@ fn car_spawn(
     let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline).unwrap();
 
     commands.spawn((
+        Car,
         collider,
-        RigidBody::Dynamic,
-        Velocity::default(),
         Sprite {
             image: sprite_handle.clone(),
             ..default()
         },
-        INITIAL_POSITION,
-        Car,
     ));
 }
 

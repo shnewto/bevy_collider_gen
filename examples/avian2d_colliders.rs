@@ -45,6 +45,7 @@ fn custom_png_spawn(
 }
 
 #[derive(Component)]
+#[require(RigidBody, Transform(|| INITIAL_POSITION))]
 pub struct Car;
 
 /// Car: `convex_polyline` collider
@@ -61,14 +62,12 @@ fn car_spawn(
     let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline).unwrap();
 
     commands.spawn((
+        Car,
         collider,
-        RigidBody::Dynamic,
         Sprite {
             image: sprite_handle.clone(),
             ..default()
         },
-        INITIAL_POSITION,
-        Car,
         DebugRender::default().with_collider_color(css::VIOLET.into()),
     ));
 }
