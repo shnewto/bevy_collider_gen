@@ -2,8 +2,7 @@ use avian2d::{
     parry::{math::Point, shape::SharedShape},
     prelude::Collider,
 };
-use edges::{translate, Edges};
-use image::GenericImageView;
+use edges::{anchor::Anchor, Edges};
 
 use crate::{utils::heights_and_scale, ColliderType};
 
@@ -23,23 +22,23 @@ use crate::{utils::heights_and_scale, ColliderType};
 pub fn generate_collider(
     image: &bevy_image::Image,
     collider_type: ColliderType,
+    anchor: Anchor,
 ) -> Option<Collider> {
     let edges = Edges::try_from(image).ok()?;
-    let (width, height) = (edges.0.width(), edges.0.height());
     let polygon = edges.single_raw()?;
-    match collider_type {
-        ColliderType::Polyline => Some(Collider::polyline(translate(polygon, width, height), None)),
-        ColliderType::ConvexPolyline => SharedShape::convex_polyline(
-            translate(polygon, width, height)
-                .into_iter()
-                .map(Point::from)
-                .collect(),
-        )
-        .map(Collider::from),
-        ColliderType::ConvexHull => Collider::convex_hull(translate(polygon, width, height)),
-        ColliderType::Heightfield => {
-            let (heights, scale) = heights_and_scale(polygon, height);
-            Some(Collider::heightfield(heights, scale))
+    if matches!(collider_type, ColliderType::Heightfield) {
+        let (heights, scale) = heights_and_scale(polygon, anchor);
+        Some(Collider::heightfield(heights, scale))
+    } else {
+        let polygon = anchor.translate(polygon);
+        match collider_type {
+            ColliderType::Polyline => Some(Collider::polyline(polygon, None)),
+            ColliderType::ConvexPolyline => {
+                SharedShape::convex_polyline(polygon.into_iter().map(Point::from).collect())
+                    .map(Collider::from)
+            }
+            ColliderType::ConvexHull => Collider::convex_hull(polygon),
+            ColliderType::Heightfield => unreachable!(),
         }
     }
 }
@@ -57,35 +56,35 @@ pub fn generate_collider(
 /// let colliders = generate_colliders(image, ColliderType::Polyline);
 /// ```
 #[must_use]
-pub fn generate_colliders(image: &bevy_image::Image, collider_type: ColliderType) -> Vec<Collider> {
+pub fn generate_colliders(
+    image: &bevy_image::Image,
+    collider_type: ColliderType,
+    anchor: Anchor,
+) -> Vec<Collider> {
     if let Ok(edges) = Edges::try_from(image) {
-        let (width, height) = (edges.width(), edges.height());
         let iter = edges.iter();
 
-        match collider_type {
-            ColliderType::Polyline => iter
-                .map(|polygon| Collider::polyline(translate(polygon, width, height), None))
-                .collect(),
-            ColliderType::ConvexPolyline => iter
-                .filter_map(|polygon| {
-                    SharedShape::convex_polyline(
-                        translate(polygon, width, height)
-                            .into_iter()
-                            .map(Point::from)
-                            .collect(),
-                    )
-                    .map(Collider::from)
-                })
-                .collect(),
-            ColliderType::ConvexHull => iter
-                .filter_map(|polygon| Collider::convex_hull(translate(polygon, width, height)))
-                .collect(),
-            ColliderType::Heightfield => iter
-                .map(|polygon| {
-                    let (heights, scale) = heights_and_scale(polygon, height);
-                    Collider::heightfield(heights, scale)
-                })
-                .collect(),
+        if matches!(collider_type, ColliderType::Heightfield) {
+            iter.map(|polygon| {
+                let (heights, scale) = heights_and_scale(polygon, anchor);
+                Collider::heightfield(heights, scale)
+            })
+            .collect()
+        } else {
+            let polygons = anchor.translate_polygons(iter).into_iter();
+            match collider_type {
+                ColliderType::Polyline => polygons
+                    .map(|polygon| Collider::polyline(polygon, None))
+                    .collect(),
+                ColliderType::ConvexPolyline => polygons
+                    .filter_map(|polygon| {
+                        SharedShape::convex_polyline(polygon.into_iter().map(Point::from).collect())
+                            .map(Collider::from)
+                    })
+                    .collect(),
+                ColliderType::ConvexHull => polygons.filter_map(Collider::convex_hull).collect(),
+                ColliderType::Heightfield => unreachable!(),
+            }
         }
     } else {
         Vec::new()

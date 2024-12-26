@@ -1,14 +1,16 @@
 use bevy_math::{UVec2, Vec2};
+use edges::{anchor::Anchor, utils::center_of};
 
-/// takes x,y points collects the y values at the top of the image (biggest y)
-pub fn heights_and_scale(mut points: Vec<UVec2>, height: u32) -> (Vec<f32>, Vec2) {
+/// takes x,y points collects the y values at the top of the image (smallest y)
+pub fn heights_and_scale(mut points: Vec<UVec2>, anchor: Anchor) -> (Vec<f32>, Vec2) {
     points.sort_by_cached_key(|p| p.x);
-    points
-        .chunk_by_mut(|p1, p2| p1 == p2)
-        .for_each(|ch| ch.sort_by(|p1, p2| p2.y.cmp(&p1.y)));
     points.dedup_by(|p1, p2| p1.x == p2.x);
 
-    let dy = height as f32 / 2.;
+    let dy = anchor.size().map_or_else(
+        || center_of(&points).map_or(0., |center| center.y),
+        |size| size.y as f32 / 2.,
+    );
+
     let heights: Vec<f32> = points
         .windows(2)
         .flat_map(|win| {
