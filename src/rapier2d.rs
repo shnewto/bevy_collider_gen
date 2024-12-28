@@ -16,17 +16,17 @@ pub fn generate_collider(
     image: &bevy_image::Image,
     collider_type: ColliderType,
 ) -> Option<Collider> {
-    let Ok(edges) = Edges::try_from(image) else {
-        return None;
-    };
+    let edges = Edges::try_from(image).ok()?;
     let (width, height) = (edges.width(), edges.height());
-    let points = edges.single_raw()?;
+    let polygon = edges.single_raw()?;
     match collider_type {
-        ColliderType::Polyline => Some(Collider::polyline(translate(points, width, height), None)),
-        ColliderType::ConvexPolyline => Collider::convex_polyline(translate(points, width, height)),
-        ColliderType::ConvexHull => Collider::convex_hull(&translate(points, width, height)),
+        ColliderType::Polyline => Some(Collider::polyline(translate(polygon, width, height), None)),
+        ColliderType::ConvexPolyline => {
+            Collider::convex_polyline(translate(polygon, width, height))
+        }
+        ColliderType::ConvexHull => Collider::convex_hull(&translate(polygon, width, height)),
         ColliderType::Heightfield => {
-            let (heights, scale) = heights_and_scale(points, height);
+            let (heights, scale) = heights_and_scale(polygon, height);
             Some(Collider::heightfield(heights, scale))
         }
     }
@@ -41,27 +41,28 @@ pub fn generate_collider(
 /// ```
 #[must_use]
 pub fn generate_colliders(image: &bevy_image::Image, collider_type: ColliderType) -> Vec<Collider> {
-    let Ok(edges) = Edges::try_from(image) else {
-        return Vec::new();
-    };
-    let (width, height) = (edges.width(), edges.height());
-    let iter = edges.iter();
+    if let Ok(edges) = Edges::try_from(image) {
+        let (width, height) = (edges.width(), edges.height());
+        let iter = edges.iter();
 
-    match collider_type {
-        ColliderType::Polyline => iter
-            .map(|points| Collider::polyline(translate(points, width, height), None))
-            .collect(),
-        ColliderType::ConvexPolyline => iter
-            .filter_map(|points| Collider::convex_polyline(translate(points, width, height)))
-            .collect(),
-        ColliderType::ConvexHull => iter
-            .filter_map(|points| Collider::convex_hull(&translate(points, width, height)))
-            .collect(),
-        ColliderType::Heightfield => iter
-            .map(|points| {
-                let (heights, scale) = heights_and_scale(points, height);
-                Collider::heightfield(heights, scale)
-            })
-            .collect(),
+        match collider_type {
+            ColliderType::Polyline => iter
+                .map(|polygon| Collider::polyline(translate(polygon, width, height), None))
+                .collect(),
+            ColliderType::ConvexPolyline => iter
+                .filter_map(|polygon| Collider::convex_polyline(translate(polygon, width, height)))
+                .collect(),
+            ColliderType::ConvexHull => iter
+                .filter_map(|polygon| Collider::convex_hull(&translate(polygon, width, height)))
+                .collect(),
+            ColliderType::Heightfield => iter
+                .map(|polygon| {
+                    let (heights, scale) = heights_and_scale(polygon, height);
+                    Collider::heightfield(heights, scale)
+                })
+                .collect(),
+        }
+    } else {
+        Vec::new()
     }
 }
