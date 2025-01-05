@@ -1,7 +1,7 @@
 #![allow(clippy::needless_pass_by_value)]
 use avian2d::prelude::*;
 use bevy::{asset::LoadState, color::palettes::css, prelude::*};
-use bevy_collider_gen::{AbstractCollider, AbstractCollidersBuilder};
+use bevy_collider_gen::prelude::*;
 use bevy_prototype_lyon::{prelude::*, shapes};
 use edges::Edges;
 use indoc::indoc;

@@ -1,11 +1,15 @@
 use bevy::prelude::*;
 
+pub use builder::Builder as AbstractCollidersBuilder;
+
+use AbstractCollider::{ConvexHull, ConvexPolyline, Heightfield, Polyline};
+
 #[cfg(feature = "avian2d")]
 mod avian2d;
 #[cfg(feature = "rapier2d")]
 mod rapier2d;
 
-use AbstractCollider::{ConvexHull, ConvexPolyline, Heightfield, Polyline};
+mod builder;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum AbstractCollider {
