@@ -3,7 +3,7 @@ use bevy::{asset::LoadState, color::palettes::css, prelude::*};
 use bevy_collider_gen::prelude::*;
 use bevy_prototype_lyon::{prelude::*, shapes};
 use bevy_rapier2d::prelude::*;
-use edges::Edges;
+use edges::EdgesIter;
 use indoc::indoc;
 use std::collections::HashMap;
 
@@ -117,14 +117,13 @@ fn boulders_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let edges = Edges::try_from(sprite_image).unwrap();
-    let polygons = edges.iter();
-    let colliders = AbstractCollidersBuilder::try_from(sprite_image)
+    let builder = AbstractCollidersBuilder::try_from(sprite_image)
         .unwrap()
         .absolute()
-        .multiple();
+        .convex_polyline();
+    let polygons = EdgesIter::new(builder.image());
 
-    for (polygon, collider) in polygons.zip(colliders.into_iter()) {
+    for (polygon, collider) in polygons.zip(builder.multiple().into_iter()) {
         let points = collider.points().unwrap().clone();
         let pos = polygon.first().unwrap().as_vec2()
             - points.first().unwrap()
