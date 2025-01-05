@@ -1,11 +1,9 @@
 #![allow(clippy::needless_pass_by_value)]
 use bevy::{asset::LoadState, color::palettes::css, prelude::*};
-use bevy_collider_gen::{
-    edges::{anchor::Anchor, Edges},
-    generate_collider, generate_colliders, ColliderType,
-};
+use bevy_collider_gen::{AbstractCollider, AbstractCollidersBuilder};
 use bevy_prototype_lyon::{prelude::*, shapes};
 use bevy_rapier2d::prelude::*;
+use edges::Edges;
 use indoc::indoc;
 use std::collections::HashMap;
 
@@ -29,11 +27,13 @@ fn custom_png_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let colliders = generate_colliders(
-        sprite_image,
-        ColliderType::ConvexPolyline,
-        Anchor::Center(sprite_image.height(), sprite_image.width()),
-    );
+    let colliders = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .convex_polyline()
+        .multiple()
+        .into_iter()
+        .filter_map(AbstractCollider::to_rapier);
+
     commands.spawn(Sprite {
         image: sprite_handle.clone(),
         ..default()
@@ -59,12 +59,12 @@ fn car_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = generate_collider(
-        sprite_image,
-        ColliderType::ConvexPolyline,
-        Anchor::Center(sprite_image.height(), sprite_image.width()),
-    )
-    .unwrap();
+    let collider = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .convex_polyline()
+        .single()
+        .and_then(AbstractCollider::to_rapier)
+        .unwrap();
 
     commands.spawn((
         Car,
@@ -87,12 +87,13 @@ fn terrain_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = generate_collider(
-        sprite_image,
-        ColliderType::Heightfield,
-        Anchor::VerticalCenter(sprite_image.height()),
-    )
-    .unwrap();
+    let collider = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .vertical(sprite_image.height())
+        .heightfield()
+        .single()
+        .and_then(AbstractCollider::to_rapier)
+        .unwrap();
 
     commands.spawn((
         collider,
@@ -118,30 +119,27 @@ fn boulders_spawn(
     let sprite_image = image_assets.get(sprite_handle).unwrap();
     let edges = Edges::try_from(sprite_image).unwrap();
     let polygons = edges.iter();
-    let colliders = generate_colliders(
-        sprite_image,
-        ColliderType::ConvexPolyline,
-        Anchor::AbsoluteCenter,
-    );
+    let colliders = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .absolute()
+        .multiple();
 
     for (polygon, collider) in polygons.zip(colliders.into_iter()) {
-        let mut pos = polygon.first().unwrap().as_vec2();
-        let polygon = Anchor::AbsoluteCenter.translate(polygon);
-        pos -= polygon.first().unwrap();
-        let shape = shapes::Polygon {
-            points: polygon,
+        let points = collider.points().unwrap().clone();
+        let pos = polygon.first().unwrap().as_vec2()
+            - points.first().unwrap()
+            - Vec2::new((sprite_image.width() / 2) as f32, -30.);
+        let collider = collider.to_rapier().unwrap();
+        let path = GeometryBuilder::build_as(&shapes::Polygon {
+            points,
             closed: true,
-        };
+        });
 
         commands.spawn((
             collider,
             ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: Transform::from_xyz(
-                    pos.x - (sprite_image.width() / 2) as f32,
-                    pos.y,
-                    0.,
-                ),
+                path,
+                transform: Transform::from_xyz(pos.x, pos.y, 0.),
                 ..default()
             },
             Fill::color(css::GRAY),
