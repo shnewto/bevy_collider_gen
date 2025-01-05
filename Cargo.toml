@@ -25,7 +25,6 @@ rapier2d = ["dep:bevy_rapier2d"]
 parallel = ["avian2d/parallel", "bevy_rapier2d/parallel", "edges/parallel"]
 
 [dependencies]
-cfg-if = "1"
 image = { version = "0.25", default-features = false }
 edges = "0.7"
 bevy = { version = "0.15", default-features = false, features = ["bevy_image"] }
