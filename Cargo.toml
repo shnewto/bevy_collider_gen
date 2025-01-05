@@ -27,8 +27,8 @@ parallel = ["avian2d/parallel", "bevy_rapier2d/parallel", "edges/parallel"]
 [dependencies]
 cfg-if = "1"
 image = { version = "0.25", default-features = false }
-bevy = { version = "0.15", default-features = false }
 edges = "0.7"
+bevy = { version = "0.15", default-features = false, features = ["bevy_image"] }
 
 [dependencies.bevy_rapier2d]
 version = "0.28"
@@ -43,18 +43,17 @@ default-features = false
 features = ["2d", "parry-f32"]
 
 [dev-dependencies]
+bevy = "0.15"
 bevy_prototype_lyon = "0.13"
 indoc = "2"
 
 [dev-dependencies.bevy_rapier2d]
 version = "0.28"
-default-features = false
-features = ["dim2", "headless", "debug-render-2d"]
+features = ["debug-render-2d"]
 
 [dev-dependencies.avian2d]
 version = "0.2"
-default-features = false
-features = ["2d", "parry-f32", "debug-plugin"]
+features = ["debug-plugin"]
 
 [[example]]
 name = "avian2d_colliders"

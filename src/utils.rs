@@ -1,4 +1,4 @@
-use bevy_math::{UVec2, Vec2};
+use bevy::prelude::*;
 use edges::{anchor::Anchor, utils::center_of};
 
 /// takes x,y points collects the y values at the top of the image (smallest y)
