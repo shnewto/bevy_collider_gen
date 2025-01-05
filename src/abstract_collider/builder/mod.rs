@@ -23,6 +23,13 @@ impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
         }
     }
 
+    pub fn image(&self) -> &I {
+        &self.image
+    }
+
+    pub fn anchor(&self) -> Anchor {
+        self.anchor
+    }
     #[must_use]
     pub fn with_anchor(self, anchor: Anchor) -> Self {
         Self { anchor, ..self }
@@ -44,6 +51,9 @@ impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
         self.with_anchor(Anchor::AbsoluteCenter)
     }
 
+    pub fn collider_type(&self) -> ColliderType {
+        self.collider_type
+    }
     #[must_use]
     pub fn with_type(self, collider_type: ColliderType) -> Self {
         Self {
