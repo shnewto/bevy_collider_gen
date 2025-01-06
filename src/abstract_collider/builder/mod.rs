@@ -7,6 +7,7 @@ use crate::{
 
 mod from;
 
+/// A builder for creating colliders from a image.
 #[derive(Clone, Debug)]
 pub struct Builder<I: GenericImageView<Pixel = Bit>> {
     image: I,
@@ -15,6 +16,15 @@ pub struct Builder<I: GenericImageView<Pixel = Bit>> {
 }
 
 impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
+    /// Creates a new `Builder` with the given image and a default anchor at the center.
+    ///
+    /// # Arguments
+    ///
+    /// * `image` - The binary image used for collider creation.
+    ///
+    /// # Returns
+    ///
+    /// A `Builder` instance initialized with the provided image.
     pub fn new(image: I) -> Self {
         Self {
             anchor: Anchor::Center(image.height(), image.width()),
@@ -23,13 +33,32 @@ impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
         }
     }
 
+    /// Returns a reference to the image used in the builder.
+    ///
+    /// # Returns
+    ///
+    /// A reference to the binary image.
     pub fn image(&self) -> &I {
         &self.image
     }
 
+    /// Returns the current anchor of the builder.
+    ///
+    /// # Returns
+    ///
+    /// The anchor used for translating polygons.
     pub fn anchor(&self) -> Anchor {
         self.anchor
     }
+    /// Sets a new anchor for the builder.
+    ///
+    /// # Arguments
+    ///
+    /// * `anchor` - The new anchor to be used.
+    ///
+    /// # Returns
+    ///
+    /// A new `Builder` instance with the updated anchor.
     #[must_use]
     pub fn with_anchor(self, anchor: Anchor) -> Self {
         Self { anchor, ..self }
@@ -51,9 +80,24 @@ impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
         self.with_anchor(Anchor::AbsoluteCenter)
     }
 
+    /// Returns the current collider type of the builder.
+    ///
+    /// # Returns
+    ///
+    /// The collider type.
     pub fn collider_type(&self) -> ColliderType {
         self.collider_type
     }
+
+    /// Sets a new collider type for the builder.
+    ///
+    /// # Arguments
+    ///
+    /// * `collider_type` - The new collider type to be used.
+    ///
+    /// # Returns
+    ///
+    /// A new `Builder` instance with the updated collider type.
     #[must_use]
     pub fn with_type(self, collider_type: ColliderType) -> Self {
         Self {
@@ -78,6 +122,7 @@ impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
         self.with_type(ColliderType::Heightfield)
     }
 
+    /// Generates multiple colliders based on the current builder's settings.
     #[must_use]
     pub fn multiple(&self) -> Vec<AbstractCollider> {
         let iter = EdgesIter::new(&self.image);
@@ -100,6 +145,7 @@ impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
                 .collect()
         }
     }
+    /// Generates a single collider based on the current builder's settings.
     #[must_use]
     pub fn single(&self) -> Option<AbstractCollider> {
         let polygon = EdgesIter::new(&self.image).next();

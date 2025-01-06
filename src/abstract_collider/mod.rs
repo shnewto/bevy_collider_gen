@@ -11,6 +11,7 @@ mod rapier2d;
 
 mod builder;
 
+/// An enumeration representing different types of abstract colliders.
 #[derive(Clone, Debug, PartialEq)]
 pub enum AbstractCollider {
     Polyline(Vec<Vec2>),
@@ -20,6 +21,10 @@ pub enum AbstractCollider {
 }
 
 impl AbstractCollider {
+    /// Returns the points of the collider if applicable.
+    ///
+    /// This method will return the points for `Polyline`, `ConvexPolyline`, and `ConvexHull`.
+    /// For `Heightfield`, it returns `None` because it does not have a set of points in the same way.
     #[must_use]
     pub fn points(&self) -> Option<&Vec<Vec2>> {
         match self {

@@ -1,8 +1,13 @@
 use bevy::prelude::*;
 use edges::{anchor::Anchor, utils::center_of};
 
-/// takes x,y points collects the y values at the top of the image (smallest y)
+/// Calculates the heights and scale based on the given points and anchor.
+///
+/// This function processes a vector of 2D integer points, sorts them, removes duplicates based on the x-coordinate,
+/// and calculates the heights relative to a specified anchor. The heights are determined by the difference between
+/// the anchor's y position and the y-coordinates of the points.
 pub fn heights_and_scale(mut points: Vec<UVec2>, anchor: Anchor) -> (Vec<f32>, Vec2) {
+    // Sort points by their x-coordinate and remove duplicates based on x.
     points.sort_by_cached_key(|p| p.x);
     points.dedup_by(|p1, p2| p1.x == p2.x);
 
