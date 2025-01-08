@@ -1,12 +1,9 @@
 #![allow(clippy::needless_pass_by_value)]
 use avian2d::prelude::*;
 use bevy::{asset::LoadState, color::palettes::css, prelude::*};
-use bevy_collider_gen::{
-    avian2d::{generate_collider, generate_colliders},
-    edges::Edges,
-    ColliderType,
-};
+use bevy_collider_gen::prelude::*;
 use bevy_prototype_lyon::{prelude::*, shapes};
+use edges::EdgesIter;
 use indoc::indoc;
 use std::collections::HashMap;
 
@@ -30,22 +27,25 @@ fn custom_png_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
+    let colliders = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .convex_polyline()
+        .multiple()
+        .into_iter()
+        .filter_map(AbstractCollider::to_avian);
+
+    commands.spawn(Sprite {
+        image: sprite_handle.clone(),
+        ..default()
+    });
 
     for collider in colliders {
-        commands.spawn((
-            collider.unwrap(),
-            RigidBody::Static,
-            SpriteBundle {
-                texture: sprite_handle.clone(),
-                ..default()
-            },
-            DebugRender::default().with_collider_color(css::VIOLET.into()),
-        ));
+        commands.spawn((collider, RigidBody::Static));
     }
 }
 
 #[derive(Component)]
+#[require(RigidBody, Transform(|| INITIAL_POSITION))]
 pub struct Car;
 
 /// Car: `convex_polyline` collider
@@ -59,16 +59,20 @@ fn car_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = generate_collider(sprite_image, ColliderType::ConvexPolyline, true).unwrap();
+    let collider = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .convex_polyline()
+        .single()
+        .and_then(AbstractCollider::to_avian)
+        .unwrap();
+
     commands.spawn((
+        Car,
         collider,
-        RigidBody::Dynamic,
-        SpriteBundle {
-            texture: sprite_handle.clone(),
-            transform: INITIAL_POSITION,
+        Sprite {
+            image: sprite_handle.clone(),
             ..default()
         },
-        Car,
         DebugRender::default().with_collider_color(css::VIOLET.into()),
     ));
 }
@@ -84,13 +88,18 @@ fn terrain_spawn(
         return;
     };
     let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = generate_collider(sprite_image, ColliderType::Heightfield, true).unwrap();
+    let collider = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .heightfield()
+        .single()
+        .and_then(AbstractCollider::to_avian)
+        .unwrap();
 
     commands.spawn((
         collider,
         RigidBody::Static,
-        SpriteBundle {
-            texture: sprite_handle.clone(),
+        Sprite {
+            image: sprite_handle.clone(),
             ..default()
         },
         DebugRender::default().with_collider_color(css::VIOLET.into()),
@@ -105,26 +114,32 @@ fn boulders_spawn(
     game_assets: Res<GameAsset>,
     image_assets: Res<Assets<Image>>,
 ) {
-    let sprite_handle = game_assets.image_handles.get("boulders");
-    if sprite_handle.is_none() {
+    let Some(sprite_handle) = game_assets.image_handles.get("boulders") else {
         return;
-    }
-    let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
+    };
+    let sprite_image = image_assets.get(sprite_handle).unwrap();
+    let builder = AbstractCollidersBuilder::try_from(sprite_image)
+        .unwrap()
+        .absolute()
+        .convex_polyline();
+    let polygons = EdgesIter::new(builder.image());
 
-    let edges = Edges::from(sprite_image);
-    let coord_group = edges.multi_image_edge_translated();
-    let colliders = generate_colliders(sprite_image, ColliderType::ConvexPolyline, true);
-
-    for (coords, collider) in coord_group.into_iter().zip(colliders.into_iter()) {
-        let shape = shapes::Polygon {
-            points: coords,
+    for (polygon, collider) in polygons.zip(builder.multiple().into_iter()) {
+        let points = collider.points().unwrap().clone();
+        let pos = polygon.first().unwrap().as_vec2()
+            - points.first().unwrap()
+            - Vec2::new((sprite_image.width() / 2) as f32, -30.);
+        let collider = collider.to_avian().unwrap();
+        let path = GeometryBuilder::build_as(&shapes::Polygon {
+            points,
             closed: true,
-        };
+        });
 
         commands.spawn((
-            collider.unwrap(),
+            collider,
             ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
+                path,
+                transform: Transform::from_xyz(pos.x, pos.y, 0.),
                 ..default()
             },
             Fill::color(css::GRAY),
@@ -175,16 +190,15 @@ fn main() {
         ))
         .init_state::<AppState>()
         .insert_resource(GameAsset::default())
-        .insert_resource(Gravity(Vec2::NEG_Y * 500.))
         .add_systems(Startup, load_assets)
         .add_systems(
             OnExit(AppState::Loading),
             (
                 camera_spawn,
-                custom_png_spawn,
                 car_spawn,
                 terrain_spawn,
                 boulders_spawn,
+                custom_png_spawn,
                 controls_text_spawn,
             ),
         )
@@ -243,40 +257,35 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
     "};
 
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Px(100.),
-                height: Val::Px(10.),
-                position_type: PositionType::Absolute,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::FlexStart,
-                left: Val::Px(80.),
-                bottom: Val::Px(600.),
-                ..default()
-            },
-            ..Default::default()
+        .spawn(Node {
+            width: Val::Px(100.),
+            height: Val::Px(10.),
+            position_type: PositionType::Absolute,
+            justify_content: JustifyContent::FlexStart,
+            align_items: AlignItems::FlexStart,
+            left: Val::Px(80.),
+            bottom: Val::Px(600.),
+            ..default()
         })
         .with_children(|parent| {
-            parent.spawn(TextBundle {
-                text: Text {
-                    sections: vec![TextSection {
-                        value: tips_text.to_string(),
-                        style: TextStyle {
-                            font: game_assets.font_handle.clone(),
-                            font_size: 20.,
-                            color: Color::srgb(0.9, 0.9, 0.9),
-                        },
-                    }],
-                    justify: JustifyText::Left,
-                    ..default()
+            parent.spawn((
+                Text(tips_text.to_string()),
+                TextFont {
+                    font: game_assets.font_handle.clone(),
+                    font_size: 20.,
+                    ..Default::default()
                 },
-                ..Default::default()
-            });
+                TextColor(Color::srgb(0.9, 0.9, 0.9)),
+                TextLayout {
+                    justify: JustifyText::Left,
+                    ..Default::default()
+                },
+            ));
         });
 }
 
 pub fn camera_spawn(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 }
 
 pub fn camera_movement(

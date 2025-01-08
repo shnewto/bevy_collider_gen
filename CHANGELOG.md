@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0](https://github.com/shnewto/bevy_collider_gen/compare/0.3.0...0.4.0) - 2025-01-06
+
+### Added
+
+- Module `prelude` which contains all public structs and modules
+  ([5be223b](https://github.com/shnewto/bevy_collider_gen/commit/5be223be29af4f52633121cdfdcdf2f4568bd973)).
+- [`image`] dependency ([e7fe636](https://github.com/shnewto/bevy_collider_gen/commit/e7fe636a605673d0887983952a0bdbaa0a992334)).
+- Structures
+  ([e792bbb](https://github.com/shnewto/edges/commit/e792bbb4b5417e6da25feb7c5b2ba3e9c76eb8ac)):
+  - `AbstractCollidersBuilder`
+  - `AbstractCollider`
+
+### Changed
+
+- Upgrade dependencies
+  ([5c03df1](https://github.com/shnewto/edges/commit/5c03df1e0e0ad56b329aacb377bbee5926915f16))
+  ([786ab6d](https://github.com/shnewto/edges/commit/786ab6df0ca4358c3d3ba2168b50dc9af3ec31f9))
+  ([a4cc65e](https://github.com/shnewto/edges/commit/a4cc65e5f18af0008c5885ceda3445b3518716d6))
+  ([555756d](https://github.com/shnewto/edges/commit/555756dbd927899180b97b4ab8018bd2de2d35b5)):
+  - [`edges`] 0.7
+  - [`bevy`] 0.15
+  - [`bevy_rapier2d`] 0.28
+  - [`bevy_avian2d`] 0.2
+- Dependencies [`bevy_math`] replaced by [`bevy`]
+  ([555756d](https://github.com/shnewto/bevy_collider_gen/commit/555756dbd927899180b97b4ab8018bd2de2d35b5)).
+- `ColliderType` moved to `prelude`
+  ([e792bbb](https://github.com/shnewto/edges/commit/e792bbb4b5417e6da25feb7c5b2ba3e9c76eb8ac)).
+
+### Removed
+
+- Modules
+  ([e792bbb](https://github.com/shnewto/edges/commit/e792bbb4b5417e6da25feb7c5b2ba3e9c76eb8ac)):
+  - `avian2d`
+  - `rapier2d`
+- Functions
+  ([e792bbb](https://github.com/shnewto/edges/commit/e792bbb4b5417e6da25feb7c5b2ba3e9c76eb8ac)):
+  - `generate_collider`
+  - `generate_colliders`
+- [`rayon`] from dependencies
+  ([e7fe636](https://github.com/shnewto/bevy_collider_gen/commit/e7fe636a605673d0887983952a0bdbaa0a992334)).
+
 ## [0.3.0](https://github.com/shnewto/bevy_collider_gen/compare/0.2.2...0.3.0) - 2024-11-20
 
 ### Added
@@ -93,6 +134,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`avian2d`]: https://crates.io/crates/avian2d
 [`rayon`]: https://crates.io/crates/rayon
 [`edges`]: https://crates.io/crates/edges
+[`image`]: https://crates.io/crates/image
 [`thiserror`]: https://crates.io/crates/thiserror
 [`bevy_prototype_lyon`]: https://crates.io/crates/bevy_prototype_lyon
 [`bevy_xpbd_2d`]: https://crates.io/crates/bevy_xpbd_2d
+[`bevy_rapier2d`]: https://crates.io/crates/bevy_rapier2d
+[`bevy_avian2d`]: https://crates.io/crates/bevy_avian2d

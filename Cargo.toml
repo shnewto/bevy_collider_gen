@@ -22,39 +22,37 @@ pedantic = { level = "warn", priority = 0 }
 default = ["rapier2d", "parallel"]
 avian2d = ["dep:avian2d"]
 rapier2d = ["dep:bevy_rapier2d"]
-parallel = ["dep:rayon", "avian2d/parallel", "bevy_rapier2d/parallel"]
+parallel = ["edges/parallel"]
 
 [dependencies]
-edges = "0.4"
-bevy_math = { version = "0.14", default-features = false }
-rayon = { version = "1", optional = true }
+image = { version = "0.25", default-features = false }
+edges = "0.7"
+bevy = { version = "0.15", default-features = false, features = ["bevy_image"] }
 
 [dependencies.bevy_rapier2d]
-version = "0.27"
+version = "0.28"
 optional = true
 default-features = false
 features = ["dim2", "headless"]
 
 [dependencies.avian2d]
-version = "0.1"
+version = "0.2"
 optional = true
 default-features = false
 features = ["2d", "parry-f32"]
 
 [dev-dependencies]
-bevy = "0.14"
-bevy_prototype_lyon = "0.12"
-indoc = "2.0.4"
+bevy = "0.15"
+bevy_prototype_lyon = "0.13"
+indoc = "2"
 
 [dev-dependencies.bevy_rapier2d]
-version = "0.27"
-default-features = false
-features = ["dim2", "headless", "debug-render-2d"]
+version = "0.28"
+features = ["debug-render-2d"]
 
 [dev-dependencies.avian2d]
-version = "0.1"
-default-features = false
-features = ["2d", "parry-f32", "debug-plugin"]
+version = "0.2"
+features = ["debug-plugin"]
 
 [[example]]
 name = "avian2d_colliders"

@@ -1,20 +1,14 @@
 #![doc = include_str!("../README.md")]
 
-pub extern crate edges;
-
-#[cfg(feature = "avian2d")]
-pub mod avian2d;
-#[cfg(feature = "rapier2d")]
-pub mod rapier2d;
-mod utils;
-
-/// An enumeration representing the different types of colliders that can be created.
-///
-/// This enum is used to specify the type of collider when generating colliders from images or other sources.
-#[derive(Clone, Copy, Debug)]
-pub enum ColliderType {
-    Polyline,
-    ConvexPolyline,
-    ConvexHull,
-    Heightfield,
+pub mod prelude {
+    pub extern crate edges;
+    pub use crate::{
+        abstract_collider::{AbstractCollider, AbstractCollidersBuilder},
+        collider_type::ColliderType,
+    };
+    pub use edges::anchor::Anchor;
 }
+
+mod abstract_collider;
+mod collider_type;
+mod utils;
