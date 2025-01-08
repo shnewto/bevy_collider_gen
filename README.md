@@ -111,8 +111,8 @@ them with the edge coordinates from your image with something like this
 
 ```rust
 let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
-let edges = Edges::from(sprite_image)
-let edge_coordinate_groups = edges.multi_image_edge_translated();
+let edges = Edges::try_from(sprite_image).unwrap();
+let edge_coordinate_groups = edges.multi_translated();
 for coords in edge_coordinate_groups {
     let indices: Vec<[u32; 2]> = (0..coords.len()).map(|i| [i as u32, i as u32]).collect();
     let collider = Collider::convex_decomposition(&coords, &indices);
