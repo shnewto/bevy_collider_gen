@@ -7,7 +7,7 @@ use crate::{
 
 mod from;
 
-/// A builder for creating colliders from a image.
+/// A builder for creating colliders from an image.
 #[derive(Clone, Debug)]
 pub struct Builder<I: GenericImageView<Pixel = Bit>> {
     image: I,

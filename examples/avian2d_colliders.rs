@@ -45,7 +45,7 @@ fn custom_png_spawn(
 }
 
 #[derive(Component)]
-#[require(RigidBody, Transform(|| INITIAL_POSITION))]
+#[require(RigidBody, Transform = INITIAL_POSITION)]
 pub struct Car;
 
 /// Car: `convex_polyline` collider
@@ -289,18 +289,18 @@ pub fn camera_spawn(mut commands: Commands) {
 }
 
 pub fn camera_movement(
-    mut query: Query<(&mut OrthographicProjection, &mut Transform), With<Camera>>,
+    mut query: Query<&mut Transform, With<Camera>>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    for (mut projection, mut transform) in &mut query {
+    for mut transform in &mut query {
         for key in keys.get_pressed() {
             match key {
                 KeyCode::ArrowUp => transform.translation.y += 10.,
                 KeyCode::ArrowDown => transform.translation.y -= 10.,
                 KeyCode::ArrowLeft => transform.translation.x -= 10.,
                 KeyCode::ArrowRight => transform.translation.x += 10.,
-                KeyCode::KeyW => projection.scale -= 0.01,
-                KeyCode::KeyS => projection.scale += 0.01,
+                KeyCode::KeyW => transform.scale -= 0.01,
+                KeyCode::KeyS => transform.scale += 0.01,
                 _ => {}
             }
         }
