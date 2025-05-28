@@ -1,4 +1,4 @@
-# bevy_collider_gen
+# `bevy_collider_gen`
 
 [![Crates.io](https://img.shields.io/crates/v/bevy_collider_gen.svg)](https://crates.io/crates/bevy_collider_gen)
 [![Crates.io](https://img.shields.io/crates/d/bevy_collider_gen.svg)](https://crates.io/crates/bevy_collider_gen)
@@ -8,7 +8,7 @@ A library for generating 2d colliders, for bevy apps, from images with transpare
 
 ## Specifying your dependency
 
-By default, both bevy_rapier2d and avian2d (formerly bevy_xpbd_2d) are enabled.
+By default, both `bevy_rapier2d` and avian2d (formerly `bevy_xpbd_2d`) are enabled.
 This is to help with the out of box experience, specifically,
 being able to run both examples and tinker.
 
@@ -39,7 +39,7 @@ default-features = false
 To see this in action you can run the example, with no arguments
 it generates a scene with various colliders using PNG's in the `assets/sprite` directory
 
-### bevy_rapier2d
+### `bevy_rapier2d`
 
 ```sh
 cargo run --example rapier2d_colliders
@@ -81,7 +81,7 @@ packaged up my approach here in case anyone else could benefit.
 (as in pictures of the sort of thing you can expect,
 not the runnable bevy app example. That's a couple headings up)
 
-### convex polyline (bevy_raiper2d only)
+### convex polyline (`bevy_raiper2d` only)
 
 ![convex polyline collider on an upside down car sprite](https://github.com/shnewto/bevy_collider_gen/blob/main/img/convex-polyline.png?raw=true)
 
