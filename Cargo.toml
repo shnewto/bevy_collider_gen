@@ -16,17 +16,19 @@ include = ["/LICENSE-APACHE", "/LICENSE-MIT", "/README.md", "/src/"]
 
 [lints.clippy]
 cast_precision_loss = { level = "allow", priority = 1 }
+needless_pass_by_value = { level = "allow", priority = 1 }
 pedantic = { level = "warn", priority = 0 }
 
 [features]
-default = ["rapier2d", "parallel"]
+default = ["rapier2d", "parallel", "plugin"]
 avian2d = ["dep:avian2d"]
 rapier2d = ["dep:bevy_rapier2d"]
 parallel = ["edges/parallel"]
+plugin = ["bevy/bevy_sprite", "bevy/bevy_asset", "bevy/bevy_log"]
 
 [dependencies]
 image = { version = "0.25", default-features = false }
-edges = "0.8"
+edges = "0.8.1"
 bevy = { version = "0.16", default-features = false, features = ["bevy_image"] }
 
 [dependencies.bevy_rapier2d]
@@ -43,7 +45,7 @@ features = ["2d", "parry-f32"]
 
 [dev-dependencies]
 bevy = "0.16"
-bevy_prototype_lyon = "0.13"
+bevy_prototype_lyon = { git = "https://github.com/rparrett/bevy_prototype_lyon", branch = "fix-dynamic-examples" }
 indoc = "2"
 
 [dev-dependencies.bevy_rapier2d]

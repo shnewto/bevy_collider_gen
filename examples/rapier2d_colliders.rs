@@ -1,20 +1,23 @@
 #![allow(clippy::needless_pass_by_value)]
 use bevy::{asset::LoadState, color::palettes::css, prelude::*};
-use bevy_collider_gen::prelude::*;
+use bevy_collider_gen::{
+    plugin::{DynamicCollider, DynamicColliderPlugin},
+    prelude::*,
+};
 use bevy_prototype_lyon::{prelude::*, shapes};
 use bevy_rapier2d::prelude::*;
 use edges::EdgesIter;
 use indoc::indoc;
 use std::collections::HashMap;
 
-/// Colliders: Car + Boulder + Terrain
-/// Illustrating how to use PNG files with transparency to generate colliders (and geometry)
-/// for 2d sprites.
-///
-/// Controls
-/// ← ↑ ↓ → (pan camera)
-/// w (zoom in)
-/// d (zoom out)
+// Colliders: Car + Boulder + Terrain
+// Illustrating how to use PNG files with transparency to generate colliders (and geometry)
+// for 2d sprites.
+//
+// Controls
+// ← ↑ ↓ → (pan camera)
+// w (zoom in)
+// d (zoom out)
 
 /// Custom PNG: `convex_polyline` colliders
 /// from png path specified as cli argument
@@ -50,25 +53,17 @@ pub struct Car;
 
 /// Car: `bevy_rapier2d` `convex_polyline` collider
 /// from assets/sprite/car.png
-fn car_spawn(
-    mut commands: Commands,
-    game_assets: Res<GameAsset>,
-    image_assets: Res<Assets<Image>>,
-) {
+fn car_spawn(mut commands: Commands, game_assets: Res<GameAsset>) {
     let Some(sprite_handle) = game_assets.image_handles.get("car") else {
         return;
     };
-    let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = AbstractCollidersBuilder::try_from(sprite_image)
-        .unwrap()
-        .convex_polyline()
-        .single()
-        .and_then(AbstractCollider::to_rapier)
-        .unwrap();
 
     commands.spawn((
         Car,
-        collider,
+        DynamicCollider {
+            collider_type: ColliderType::ConvexPolyline,
+            ..default()
+        },
         Sprite {
             image: sprite_handle.clone(),
             ..default()
@@ -78,25 +73,16 @@ fn car_spawn(
 
 /// Terrain: `bevy_rapier2d` heightfield collider
 /// from assets/sprite/terrain.png
-fn terrain_spawn(
-    mut commands: Commands,
-    game_assets: Res<GameAsset>,
-    image_assets: Res<Assets<Image>>,
-) {
+fn terrain_spawn(mut commands: Commands, game_assets: Res<GameAsset>) {
     let Some(sprite_handle) = game_assets.image_handles.get("terrain") else {
         return;
     };
-    let sprite_image = image_assets.get(sprite_handle).unwrap();
-    let collider = AbstractCollidersBuilder::try_from(sprite_image)
-        .unwrap()
-        .vertical(sprite_image.height())
-        .heightfield()
-        .single()
-        .and_then(AbstractCollider::to_rapier)
-        .unwrap();
 
     commands.spawn((
-        collider,
+        DynamicCollider {
+            collider_type: ColliderType::Heightfield,
+            ..default()
+        },
         RigidBody::Fixed,
         Sprite {
             image: sprite_handle.clone(),
@@ -129,20 +115,17 @@ fn boulders_spawn(
             - points.first().unwrap()
             - Vec2::new((sprite_image.width() / 2) as f32, -30.);
         let collider = collider.to_rapier().unwrap();
-        let path = GeometryBuilder::build_as(&shapes::Polygon {
-            points,
-            closed: true,
-        });
 
         commands.spawn((
             collider,
-            ShapeBundle {
-                path,
-                transform: Transform::from_xyz(pos.x, pos.y, 0.),
-                ..default()
-            },
-            Fill::color(css::GRAY),
-            Stroke::new(css::BLACK, 1.),
+            ShapeBuilder::with(&shapes::Polygon {
+                points,
+                closed: true,
+            })
+            .fill(css::GRAY)
+            .stroke((css::BLACK, 1.))
+            .build(),
+            Transform::from_xyz(pos.x, pos.y, 0.),
             RigidBody::Dynamic,
         ));
     }
@@ -193,6 +176,7 @@ fn main() {
                 ..default()
             },
         ))
+        .add_plugins(DynamicColliderPlugin::<Collider>::new())
         .init_state::<AppState>()
         .insert_resource(GameAsset::default())
         .add_systems(Startup, load_assets)

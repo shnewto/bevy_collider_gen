@@ -11,4 +11,6 @@ pub mod prelude {
 
 mod abstract_collider;
 mod collider_type;
+#[cfg(feature = "plugin")]
+pub mod plugin;
 mod utils;
