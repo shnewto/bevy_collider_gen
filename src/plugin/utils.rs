@@ -32,10 +32,10 @@ pub fn process_image(
     }
 
     if flip_x {
-        image = image.flip_vertical();
+        image = image.flip_horizontal();
     }
     if flip_y {
-        image = image.flip_horizontal();
+        image = image.flip_vertical();
     }
 
     image
