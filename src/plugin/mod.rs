@@ -2,7 +2,7 @@ use bevy::{asset::LoadState, prelude::*};
 
 use crate::prelude::AbstractCollider;
 pub use components::DynamicCollider;
-use systems::add_colliders;
+use systems::update_colliders;
 
 pub mod components;
 mod systems;
@@ -29,7 +29,10 @@ where
     TargetCollider: Component,
 {
     fn build(&self, app: &mut App) {
-        app.add_systems(Last, add_colliders::<TargetCollider>.run_if(assets_loaded));
+        app.add_systems(
+            Last,
+            update_colliders::<TargetCollider>.run_if(assets_loaded),
+        );
     }
 }
 

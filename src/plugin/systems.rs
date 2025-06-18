@@ -4,9 +4,16 @@ use edges::binary_image::BinaryImage;
 use super::{utils::process_image, DynamicCollider};
 use crate::prelude::{AbstractCollider, AbstractCollidersBuilder};
 
-pub fn add_colliders<TargetCollider>(
+type Filter<TargetCollider> = Or<(
+    Without<TargetCollider>,
+    Added<Sprite>,
+    Changed<Sprite>,
+    Changed<DynamicCollider>,
+)>;
+
+pub fn update_colliders<TargetCollider>(
     mut commands: Commands,
-    query: Query<(Entity, &DynamicCollider, Option<&Sprite>), Without<TargetCollider>>,
+    query: Query<(Entity, &DynamicCollider, Option<&Sprite>), Filter<TargetCollider>>,
     images: Res<Assets<Image>>,
     layouts: Res<Assets<TextureAtlasLayout>>,
 ) where
