@@ -129,6 +129,15 @@ for coords in edge_coordinate_groups {
 
 ![convex decomposition collider on a car sprite](https://github.com/shnewto/bevy_collider_gen/blob/main/img/convex-decomposition.png?raw=true)
 
+## Bevy Supported Versions
+
+| Bevy | bevy_collider_gen | avian | rapier |
+| ---- | ----------------- | ----- | ------ |
+| 0.16 | 0.5               | 0.3   | 0.30.0 |
+| 0.15 | 0.4               | 0.2   | 0.28.0 |
+| 0.14 | 0.2.2 - 0.3       | 0.1   | 0.27.0 |
+| 0.13 | 0.1 - 0.2.1       | x     | 0.25.0 |
+
 ## License
 
 All code in this repository is dual-licensed under either:
