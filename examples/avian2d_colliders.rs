@@ -318,7 +318,7 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
                 },
                 TextColor(Color::srgb(0.9, 0.9, 0.9)),
                 TextLayout {
-                    justify: JustifyText::Left,
+                    justify: Justify::Left,
                     ..default()
                 },
             ));

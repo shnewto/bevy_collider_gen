@@ -1,5 +1,5 @@
 use avian2d::{
-    parry::{math::Point, shape::SharedShape},
+    parry::{math::Vector, shape::SharedShape},
     prelude::Collider,
 };
 
@@ -18,7 +18,7 @@ impl From<AbstractCollider> for Option<Collider> {
         match value {
             Polyline(vertices) => Some(Collider::polyline(vertices, None)),
             ConvexPolyline(points) => {
-                SharedShape::convex_polyline(points.into_iter().map(Point::from).collect())
+                SharedShape::convex_polyline(points.into_iter().map(Vector::from).collect())
                     .map(Collider::from)
             }
             ConvexHull(points) => Collider::convex_hull(points),

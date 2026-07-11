@@ -29,31 +29,31 @@ plugin = ["bevy/bevy_sprite", "bevy/bevy_asset", "bevy/bevy_log"]
 [dependencies]
 image = { version = "0.25", default-features = false }
 edges = "0.8.1"
-bevy = { version = "0.16", default-features = false, features = ["bevy_image"] }
+bevy = { version = "0.18", default-features = false, features = ["bevy_image"] }
 
 [dependencies.bevy_rapier2d]
-version = "0.30"
+version = "0.34"
 optional = true
 default-features = false
 features = ["dim2", "headless"]
 
 [dependencies.avian2d]
-version = "0.3"
+version = "0.6"
 optional = true
 default-features = false
 features = ["2d", "parry-f32"]
 
 [dev-dependencies]
-bevy = "0.16"
-bevy_prototype_lyon = { git = "https://github.com/rparrett/bevy_prototype_lyon", branch = "fix-dynamic-examples" }
+bevy = "0.18"
+bevy_prototype_lyon = "0.16"
 indoc = "2"
 
 [dev-dependencies.bevy_rapier2d]
-version = "0.30"
+version = "0.34"
 features = ["debug-render-2d"]
 
 [dev-dependencies.avian2d]
-version = "0.3"
+version = "0.6"
 features = ["debug-plugin"]
 
 [[example]]
