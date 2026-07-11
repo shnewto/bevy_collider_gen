@@ -28,7 +28,7 @@ plugin = ["bevy/bevy_sprite", "bevy/bevy_asset", "bevy/bevy_log"]
 
 [dependencies]
 image = { version = "0.25", default-features = false }
-edges = "0.8.1"
+edges = { git = "https://github.com/shnewto/edges", version = "0.8.2" }
 bevy = { version = "0.18", default-features = false, features = ["bevy_image"] }
 
 [dependencies.bevy_rapier2d]
