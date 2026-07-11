@@ -322,7 +322,7 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
                 },
                 TextColor(Color::srgb(0.9, 0.9, 0.9)),
                 TextLayout {
-                    justify: JustifyText::Left,
+                    justify: Justify::Left,
                     ..Default::default()
                 },
             ));
@@ -365,7 +365,7 @@ pub fn car_movement(
     keys: Res<ButtonInput<KeyCode>>,
 ) {
     for (mut transform, mut velocity) in &mut query {
-        let linear_velocity = &mut velocity.linvel;
+        let linear_velocity = &mut velocity.linear;
         for key in keys.get_pressed() {
             match key {
                 KeyCode::KeyA => linear_velocity.x -= 30.,
