@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use edges::binary_image::BinaryImage;
+use edges::BinaryImage;
 
 use super::{utils::process_image, DynamicCollider};
 use crate::prelude::{AbstractCollider, AbstractCollidersBuilder};

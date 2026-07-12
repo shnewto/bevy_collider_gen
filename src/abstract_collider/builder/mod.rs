@@ -1,5 +1,4 @@
-use edges::{anchor::Anchor, binary_image::Bit, EdgesIter};
-use image::GenericImageView;
+use edges::{anchor::Anchor, BinaryImageView, EdgesIter};
 
 use crate::{
     abstract_collider::AbstractCollider, collider_type::ColliderType, utils::heights_and_scale,
@@ -9,13 +8,13 @@ mod from;
 
 /// A builder for creating colliders from an image.
 #[derive(Clone, Debug)]
-pub struct Builder<I: GenericImageView<Pixel = Bit>> {
+pub struct Builder<I: BinaryImageView> {
     image: I,
     anchor: Anchor,
     collider_type: ColliderType,
 }
 
-impl<I: GenericImageView<Pixel = Bit>> Builder<I> {
+impl<I: BinaryImageView> Builder<I> {
     /// Creates a new `Builder` with the given image and a default anchor at the center.
     ///
     /// # Arguments

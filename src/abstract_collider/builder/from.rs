@@ -1,5 +1,4 @@
-use bevy::prelude::*;
-use edges::binary_image::{self, BinaryImage, BinaryView};
+use edges::{BinaryImage, BinaryView};
 use image::DynamicImage;
 
 use super::Builder;
@@ -16,16 +15,16 @@ impl From<DynamicImage> for Builder<BinaryImage> {
     }
 }
 
-impl TryFrom<&Image> for Builder<BinaryImage> {
-    type Error = binary_image::bevy::IntoBinaryImageError;
-    fn try_from(image: &Image) -> Result<Self, Self::Error> {
+impl TryFrom<&bevy::prelude::Image> for Builder<BinaryImage> {
+    type Error = edges::IntoBinaryImageError;
+    fn try_from(image: &bevy::prelude::Image) -> Result<Self, Self::Error> {
         BinaryImage::try_from(image).map(Self::new)
     }
 }
 
-impl TryFrom<Image> for Builder<BinaryImage> {
-    type Error = binary_image::bevy::IntoBinaryImageError;
-    fn try_from(image: Image) -> Result<Self, Self::Error> {
+impl TryFrom<bevy::prelude::Image> for Builder<BinaryImage> {
+    type Error = edges::IntoBinaryImageError;
+    fn try_from(image: bevy::prelude::Image) -> Result<Self, Self::Error> {
         BinaryImage::try_from(image).map(Self::new)
     }
 }
