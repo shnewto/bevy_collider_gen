@@ -17,7 +17,9 @@ use std::collections::HashMap;
 // Controls
 // ← ↑ ↓ → (pan camera)
 // w (zoom in)
-// d (zoom out)
+// s (zoom out)
+// a d (move car)
+// 1 (reset car)
 
 /// Custom PNG: `convex_polyline` colliders
 /// from png path specified as cli argument
@@ -89,61 +91,6 @@ fn terrain_spawn(mut commands: Commands, game_assets: Res<GameAsset>) {
             ..default()
         },
     ));
-}
-
-#[derive(Component)]
-pub struct Atlas;
-
-fn atlas_spawn(
-    mut commands: Commands,
-    game_assets: Res<GameAsset>,
-    mut atlases: ResMut<Assets<TextureAtlasLayout>>,
-) {
-    let Some(sprite_handle) = game_assets.image_handles.get("atlas") else {
-        return;
-    };
-    let layout = atlases.add(TextureAtlasLayout::from_grid(
-        UVec2::new(16, 16),
-        2,
-        2,
-        None,
-        None,
-    ));
-
-    commands.spawn((
-        DynamicCollider {
-            collider_type: ColliderType::ConvexPolyline,
-            ..default()
-        },
-        RigidBody::Fixed,
-        Sprite {
-            image: sprite_handle.clone(),
-            texture_atlas: Some(TextureAtlas { layout, index: 0 }),
-            ..default()
-        },
-        Atlas,
-    ));
-}
-pub fn atlas_control(mut query: Query<&mut Sprite, With<Atlas>>, keys: Res<ButtonInput<KeyCode>>) {
-    for mut sprite in &mut query {
-        for key in keys.get_just_pressed() {
-            match key {
-                KeyCode::Digit2 => {
-                    if let Some(atlas) = sprite.texture_atlas.as_mut() {
-                        if atlas.index < 3 {
-                            atlas.index += 1;
-                        }
-                    }
-                }
-                KeyCode::Digit3 => {
-                    if let Some(atlas) = sprite.texture_atlas.as_mut() {
-                        atlas.index = atlas.index.saturating_sub(1);
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
 }
 
 /// Boulder: using groups of edge coordinates to create geometry to color fill
@@ -238,7 +185,6 @@ fn main() {
         .add_systems(
             OnExit(AppState::Loading),
             (
-                atlas_spawn,
                 camera_spawn,
                 car_spawn,
                 terrain_spawn,
@@ -251,7 +197,7 @@ fn main() {
             Update,
             (
                 check_assets.run_if(in_state(AppState::Loading)),
-                (atlas_control, camera_movement, car_movement).run_if(in_state(AppState::Running)),
+                (camera_movement, car_movement).run_if(in_state(AppState::Running)),
             ),
         )
         .run();
@@ -280,7 +226,6 @@ pub fn load_assets(asset_server: Res<AssetServer>, mut game_assets: ResMut<GameA
         ("car", asset_server.load("assets/sprite/car.png")),
         ("terrain", asset_server.load("assets/sprite/terrain.png")),
         ("boulders", asset_server.load("assets/sprite/boulders.png")),
-        ("atlas", asset_server.load("assets/sprite/atlas.png")),
     ]);
     if let Some(png_path) = std::env::args().nth(1) {
         info!("Loading {}", png_path);

@@ -28,7 +28,7 @@ plugin = ["bevy/bevy_sprite", "bevy/bevy_asset", "bevy/bevy_log"]
 
 [dependencies]
 image = { version = "0.25", default-features = false }
-edges = { git = "https://github.com/shnewto/edges", version = "0.8.2" }
+edges = "0.9"
 bevy = { version = "0.18", default-features = false, features = ["bevy_image"] }
 
 [dependencies.bevy_rapier2d]
@@ -65,3 +65,8 @@ required-features = ["avian2d"]
 name = "rapier2d_colliders"
 path = "examples/rapier2d_colliders.rs"
 required-features = ["rapier2d"]
+
+[[example]]
+name = "texture_atlas"
+path = "examples/texture_atlas.rs"
+required-features = ["plugin"]

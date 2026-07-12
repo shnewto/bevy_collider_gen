@@ -8,9 +8,9 @@ A library for generating 2d colliders, for bevy apps, from images with transpare
 
 ## Specifying your dependency
 
-By default, both `bevy_rapier2d` and avian2d (formerly `bevy_xpbd_2d`) are enabled.
+By default, `bevy_rapier2d` is enabled (along with `parallel` and `plugin`).
 This is to help with the out of box experience, specifically,
-being able to run both examples and tinker.
+being able to run examples and tinker.
 
 But you'll probably only want to just use one of the physics engines supported
 so when you use it in your own crate fill in in the `bevy_collider_gen`
@@ -49,6 +49,16 @@ cargo run --example rapier2d_colliders
 
 ```sh
 cargo run --example avian2d_colliders -F avian2d
+```
+
+### Texture atlas
+
+Shows a `DynamicCollider` regenerating when the `TextureAtlas` frame changes.
+Defaults to `rapier2d`; pass `-F avian2d` to use avian instead
+
+```sh
+cargo run --example texture_atlas
+cargo run --example texture_atlas -F avian2d
 ```
 
 You can also specify a path to an image yourself the example will attempt to
@@ -114,15 +124,12 @@ let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 let edges = Edges::try_from(sprite_image).unwrap();
 let edge_coordinate_groups = edges.multi_translated();
 for coords in edge_coordinate_groups {
-    let indices: Vec<[u32; 2]> = (0..coords.len()).map(|i| [i as u32, i as u32]).collect();
+    let indices: Vec<[u32; 2]> = (0..coords.len()).map(|i| [i as u32, (i as u32 + 1) % coords.len() as u32]).collect();
     let collider = Collider::convex_decomposition(&coords, &indices);
     commands.spawn((
         collider,
         RigidBody::Fixed,
-        SpriteBundle {
-            texture: sprite_handle.unwrap().clone(),
-            ..default()
-        },
+        Sprite::from_image(sprite_handle.clone()),
     ));
 }
 ```

@@ -1,13 +1,12 @@
 use bevy::prelude::*;
-use edges::binary_image::BinaryImage;
-use image::GenericImageView;
+use edges::{BinaryImage, BinaryImageView};
 
 fn crop_image(image: BinaryImage, rect: URect) -> BinaryImage {
     let (width, height) = image.dimensions();
     let (x, y) = (rect.min.x, rect.min.y);
     let crop_width = rect.width().min(width.saturating_sub(x));
     let crop_height = rect.height().min(height.saturating_sub(y));
-    BinaryImage::from(image.view(x, y, crop_width, crop_height).to_image())
+    image.crop(x, y, crop_width, crop_height)
 }
 
 pub fn process_image(
