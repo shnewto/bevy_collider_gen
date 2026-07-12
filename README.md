@@ -109,7 +109,7 @@ sprites were small, and collisions were forceful, they were sort of unreliable
 But if you wanted to use convex decomposition colliders you could construct
 them with the edge coordinates from your image with something like this
 
-```rust
+```rust,ignore
 let sprite_image = image_assets.get(sprite_handle.unwrap()).unwrap();
 let edges = Edges::try_from(sprite_image).unwrap();
 let edge_coordinate_groups = edges.multi_translated();
