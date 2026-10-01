@@ -151,7 +151,7 @@ pub fn update_colliders<TargetCollider>(
                                 if !saved_query.iter_mut().any(
                                     |LoadedCollider(image_handle, collider_handle)| {
                                         if handle == *image_handle {
-                                            if let Some(collider) =
+                                            if let Some(mut collider) =
                                                 cached_colliders.get_mut(collider_handle)
                                             {
                                                 *collider = CachedCollider::Atlas(ColliderAtlas(
@@ -235,7 +235,7 @@ pub fn update_colliders<TargetCollider>(
                             if !saved_query.iter_mut().any(
                                 |LoadedCollider(image_handle, collider_handle)| {
                                     if handle == *image_handle {
-                                        if let Some(collider) =
+                                        if let Some(mut collider) =
                                             cached_colliders.get_mut(collider_handle)
                                         {
                                             *collider = CachedCollider::Multiple(colliders.clone());
@@ -294,7 +294,7 @@ pub fn update_colliders<TargetCollider>(
                                 if !saved_query.iter_mut().any(
                                     |LoadedCollider(image_handle, collider_handle)| {
                                         if handle == *image_handle {
-                                            if let Some(collider) =
+                                            if let Some(mut collider) =
                                                 cached_colliders.get_mut(collider_handle)
                                             {
                                                 *collider = CachedCollider::Single(
