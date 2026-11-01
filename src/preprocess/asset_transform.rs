@@ -144,14 +144,37 @@ impl ColliderLoader {
         }
 
         if let Some(array_layout) = settings.array_layout {
-            let layers = match array_layout {
-                ImageArrayLayout::RowCount { rows } => rows,
-                ImageArrayLayout::RowHeight { pixels } => image.height() / pixels,
-            };
-
-            image
-                .reinterpret_stacked_2d_as_array(layers)
-                .map_err(|e| ColliderProcessError(e.to_string()))?;
+            image = match array_layout {
+                ImageArrayLayout::RowCount { rows } => {
+                    image.reinterpret_stacked_2d_as_array(rows).map(|()| image)
+                }
+                ImageArrayLayout::RowHeight { pixels } => image
+                    .reinterpret_stacked_2d_as_array(image.height() / pixels)
+                    .map(|()| image),
+                ImageArrayLayout::GridCount { columns, rows } => {
+                    image.create_stacked_array_from_2d_grid(rows, columns)
+                }
+                ImageArrayLayout::GridSize {
+                    tile_width_pixels,
+                    tile_height_pixels,
+                } => {
+                    let rows = image
+                        .height()
+                        .checked_div(tile_height_pixels)
+                        .ok_or_else(|| {
+                            ColliderProcessError("grid tile height must be nonzero".into())
+                        })?;
+                    let columns =
+                        image
+                            .width()
+                            .checked_div(tile_width_pixels)
+                            .ok_or_else(|| {
+                                ColliderProcessError("grid tile width must be nonzero".into())
+                            })?;
+                    image.create_stacked_array_from_2d_grid(rows, columns)
+                }
+            }
+            .map_err(|e| ColliderProcessError(e.to_string()))?;
         }
 
         Ok(image)
@@ -170,8 +193,9 @@ impl AssetSaver for ColliderSaver {
     async fn save(
         &self,
         writer: &mut Writer,
-        asset: SavedAsset<'_, Self::Asset>,
+        asset: SavedAsset<'_, '_, Self::Asset>,
         _settings: &Self::Settings,
+        _asset_path: bevy::asset::AssetPath<'_>,
     ) -> Result<ColliderSettings, Self::Error> {
         let image_ref = &asset.get().source;
         let (image_raw, load_settings) = Self::image_to_bytes(image_ref, default(), "png")
@@ -289,6 +313,91 @@ mod test {
         meta::AssetMeta, processor::LoadTransformAndSave, transformer::IdentityAssetTransformer,
     };
     use std::io::Read;
+
+    #[cfg(test)]
+    fn grid_image_bytes() -> Vec<u8> {
+        let pixels: Vec<u8> = (1..=24).flat_map(|value| [value, 0, 0, 255]).collect();
+        let mut bytes = Vec::new();
+        image::write_buffer_with_format(
+            &mut std::io::Cursor::new(&mut bytes),
+            &pixels,
+            6,
+            4,
+            ExtendedColorType::Rgba8,
+            ImageFormat::Png,
+        )
+        .expect("grid image encodes");
+        bytes
+    }
+
+    #[test]
+    fn image_grid_array_layout_test() {
+        let bytes = grid_image_bytes();
+        let expected_pixels: Vec<u8> = [
+            1, 2, 7, 8, 3, 4, 9, 10, 5, 6, 11, 12, 13, 14, 19, 20, 15, 16, 21, 22, 17, 18, 23, 24,
+        ]
+        .into_iter()
+        .flat_map(|value| [value, 0, 0, 255])
+        .collect();
+
+        for array_layout in [
+            ImageArrayLayout::GridCount {
+                columns: 3,
+                rows: 2,
+            },
+            ImageArrayLayout::GridSize {
+                tile_width_pixels: 2,
+                tile_height_pixels: 2,
+            },
+        ] {
+            let settings = ImageLoaderSettings {
+                array_layout: Some(array_layout),
+                ..default()
+            };
+            let image = ColliderLoader::image_from_bytes("png", &mut bytes.clone(), &settings)
+                .expect("grid image loads");
+
+            assert_eq!(image.width(), 2);
+            assert_eq!(image.height(), 2);
+            assert_eq!(image.texture_descriptor.size.depth_or_array_layers, 6);
+            assert_eq!(image.data.as_deref(), Some(expected_pixels.as_slice()));
+        }
+    }
+
+    #[test]
+    fn image_grid_array_layout_invalid_test() {
+        let bytes = grid_image_bytes();
+        for array_layout in [
+            ImageArrayLayout::GridCount {
+                columns: 4,
+                rows: 2,
+            },
+            ImageArrayLayout::GridCount {
+                columns: 0,
+                rows: 2,
+            },
+            ImageArrayLayout::GridSize {
+                tile_width_pixels: 0,
+                tile_height_pixels: 2,
+            },
+            ImageArrayLayout::GridSize {
+                tile_width_pixels: 2,
+                tile_height_pixels: 0,
+            },
+            ImageArrayLayout::GridSize {
+                tile_width_pixels: 8,
+                tile_height_pixels: 2,
+            },
+        ] {
+            let settings = ImageLoaderSettings {
+                array_layout: Some(array_layout),
+                ..default()
+            };
+            assert!(
+                ColliderLoader::image_from_bytes("png", &mut bytes.clone(), &settings).is_err()
+            );
+        }
+    }
 
     /// Tests that Bevy [`Image`]s can be converted to and from the `image` crate structs across Bevy versions.
     #[test]

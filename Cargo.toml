@@ -29,17 +29,17 @@ preprocess = ["dep:serde", "dep:ron", "bevy/bevy_sprite", "bevy/bevy_asset", "be
 
 [dependencies]
 image = { version = "0.25", default-features = false }
-edges = "0.9"
-bevy = { version = "0.18", default-features = false, features = ["bevy_image"] }
+edges = "0.10"
+bevy = { version = "0.19", default-features = false, features = ["bevy_image"] }
 
 [dependencies.bevy_rapier2d]
-version = "0.34"
+version = "0.36"
 optional = true
 default-features = false
 features = ["dim2", "headless"]
 
 [dependencies.avian2d]
-version = "0.6"
+version = "0.7"
 optional = true
 default-features = false
 features = ["2d", "parry-f32"]
@@ -53,16 +53,16 @@ version = "0.12"
 optional = true
 
 [dev-dependencies]
-bevy = "0.18"
-bevy_prototype_lyon = "0.16"
+bevy = "0.19"
+bevy_prototype_lyon = "0.17"
 indoc = "2"
 
 [dev-dependencies.bevy_rapier2d]
-version = "0.34"
+version = "0.36"
 features = ["debug-render-2d"]
 
 [dev-dependencies.avian2d]
-version = "0.6"
+version = "0.7"
 features = ["debug-plugin"]
 
 [[example]]

@@ -365,8 +365,8 @@ pub fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) 
             parent.spawn((
                 Text(tips_text.to_string()),
                 TextFont {
-                    font: game_assets.font_handle.clone(),
-                    font_size: 20.,
+                    font: game_assets.font_handle.clone().into(),
+                    font_size: FontSize::Px(20.),
                     ..Default::default()
                 },
                 TextColor(Color::srgb(0.9, 0.9, 0.9)),

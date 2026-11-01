@@ -213,8 +213,8 @@ fn controls_text_spawn(mut commands: Commands, game_assets: Res<GameAsset>) {
             parent.spawn((
                 Text(tips_text),
                 TextFont {
-                    font: game_assets.font_handle.clone(),
-                    font_size: 20.,
+                    font: game_assets.font_handle.clone().into(),
+                    font_size: FontSize::Px(20.),
                     ..default()
                 },
                 TextColor(Color::srgb(0.9, 0.9, 0.9)),
